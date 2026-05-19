@@ -3,6 +3,7 @@ import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { AuthLayout } from '@/layouts/AuthLayout';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { Home } from '@/pages/Home';
+import { ApiWorkspace } from '@/pages/workspace/ApiWorkspace';
 import { Login } from '@/pages/auth/Login';
 import { Register } from '@/pages/auth/Register';
 
@@ -21,7 +22,7 @@ export const router = createBrowserRouter([
           },
           {
             path: 'api',
-            element: <div className="p-8"><h2 className="text-2xl font-bold">API Workspace (Coming Soon)</h2></div>,
+            element: <ApiWorkspace />,
           },
           {
             path: 'format',

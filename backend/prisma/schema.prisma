@@ -18,6 +18,7 @@ model User {
   updatedAt    DateTime  @updatedAt
   
   sessions     Session[]
+  workspaces   Workspace[]
 }
 
 model Session {
@@ -29,4 +30,28 @@ model Session {
   createdAt    DateTime @default(now())
 
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Workspace {
+  id        String       @id @default(uuid())
+  userId    String
+  name      String       @default("My Workspace")
+  requests  ApiRequest[]
+  
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ApiRequest {
+  id           String    @id @default(uuid())
+  workspaceId  String
+  name         String
+  method       String    @default("GET")
+  url          String
+  headers      Json?     
+  queryParams  Json?     
+  body         String?   
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 }

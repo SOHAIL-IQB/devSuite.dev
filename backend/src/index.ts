@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth.routes';
+import workspaceRoutes from './routes/workspace.routes';
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.use(cookieParser());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/workspace', workspaceRoutes);
 
 // Health Check Route
 app.get('/health', (req: Request, res: Response) => {
