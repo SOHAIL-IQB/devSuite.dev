@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: devworkspace-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: devworkspace_user
+      POSTGRES_PASSWORD: devworkspace_password
+      POSTGRES_DB: devworkspace_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: devworkspace-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
