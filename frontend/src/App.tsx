@@ -1,9 +1,17 @@
+import { RouterProvider } from 'react-router-dom';
+import { router } from './routes';
+import { ThemeProvider } from '@/components/providers/ThemeProvider';
+import { CommandPalette } from '@/components/CommandPalette';
+import { Toaster } from '@/components/ui/sonner';
+
 function App() {
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-background text-foreground">
-      <h1 className="text-4xl font-bold">DevWorkspace</h1>
-    </div>
-  )
+    <ThemeProvider>
+      <RouterProvider router={router} />
+      <CommandPalette />
+      <Toaster />
+    </ThemeProvider>
+  );
 }
 
-export default App
+export default App;
