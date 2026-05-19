@@ -5,9 +5,9 @@ services:
     ports:
       - "5433:5432"
     environment:
-      POSTGRES_USER: devworkspace_user
+      POSTGRES_USER: devworkspace
       POSTGRES_PASSWORD: devworkspace_password
-      POSTGRES_DB: devworkspace_db
+      POSTGRES_DB: devworkspace
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
