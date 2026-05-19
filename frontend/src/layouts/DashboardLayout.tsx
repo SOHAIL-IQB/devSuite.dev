@@ -1,5 +1,7 @@
 import { Outlet, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { CommandPalette } from '@/components/CommandPalette';
+import { Toaster } from '@/components/ui/sonner';
 import { 
   Terminal, 
   Settings, 
@@ -126,6 +128,8 @@ export function DashboardLayout() {
           </AnimatePresence>
         </div>
       </main>
+      <CommandPalette />
+      <Toaster />
     </div>
   );
 }
