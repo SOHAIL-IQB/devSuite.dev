@@ -31,12 +31,17 @@ export function CodeFormatter() {
 
   const [activeLang, setActiveLang] = useState<FormatterType>('json');
   const [markers, setMarkers] = useState<editor.IMarkerData[]>([]);
-  const [isValid, setIsValid] = useState<boolean | null>(null);
   const [isFormatting, setIsFormatting] = useState(false);
   const [content, setContent] = useState('');
 
   const debouncedContent = useDebounce(content, 500);
   const strategy = formatters[activeLang];
+
+  // Derived state for diagnostics
+  const errors = markers.filter((m) => m.severity === monaco?.MarkerSeverity.Error);
+  const warnings = markers.filter((m) => m.severity === monaco?.MarkerSeverity.Warning);
+  const totalProblems = markers.length;
+  const isCodeEmpty = !content.trim();
 
   // Enable Monaco Native TypeScript Semantic Validation
   useEffect(() => {
@@ -55,16 +60,16 @@ export function CodeFormatter() {
     }
   }, [monaco]);
 
-  // Sync Monaco Markers
+  // Sync Monaco Markers via onDidChangeMarkers
   useEffect(() => {
-    if (!editorRef.current || !monaco) return;
-    const disposable = editorRef.current.onDidChangeModelDecorations(() => {
-      const model = editorRef.current?.getModel();
-      if (model) {
-        const allMarkers = monaco.editor.getModelMarkers({ resource: model.uri });
-        setMarkers(allMarkers);
-        const hasErrors = allMarkers.some(m => m.severity === monaco.MarkerSeverity.Error);
-        setIsValid(model.getValue().trim() ? !hasErrors : null);
+    if (!monaco) return;
+    const disposable = monaco.editor.onDidChangeMarkers(() => {
+      if (editorRef.current) {
+        const model = editorRef.current.getModel();
+        if (model) {
+          const allMarkers = monaco.editor.getModelMarkers({ resource: model.uri });
+          setMarkers(allMarkers);
+        }
       }
     });
     return () => disposable.dispose();
@@ -98,7 +103,6 @@ export function CodeFormatter() {
     validate();
   }, [debouncedContent, strategy, monaco]);
 
-
   const handleEditorWillMount = (monacoInstance: typeof monaco) => {
     if (!monacoInstance) return;
     monacoInstance.editor.defineTheme('devworkspace-dark', {
@@ -124,7 +128,9 @@ export function CodeFormatter() {
 
   const handleEditorMount = (editorInstance: editor.IStandaloneCodeEditor) => {
     editorRef.current = editorInstance;
-    editorInstance.setValue(DEFAULT_CONTENT[activeLang]);
+    const initialContent = DEFAULT_CONTENT[activeLang];
+    editorInstance.setValue(initialContent);
+    setContent(initialContent);
   };
 
   const executeFormat = (formattedText: string) => {
@@ -177,13 +183,25 @@ export function CodeFormatter() {
   const onLanguageChange = (val: FormatterType) => {
     setActiveLang(val);
     if (editorRef.current) {
-      editorRef.current.setValue(DEFAULT_CONTENT[val]);
+      const newContent = DEFAULT_CONTENT[val];
+      editorRef.current.setValue(newContent);
+      setContent(newContent);
+      // Clear markers explicitly when switching
+      const model = editorRef.current.getModel();
+      if (model && monaco) {
+        monaco.editor.setModelMarkers(model, 'devworkspace', []);
+      }
     }
   };
 
   const clear = () => {
     if (editorRef.current) {
       editorRef.current.setValue('');
+      setContent('');
+      const model = editorRef.current.getModel();
+      if (model && monaco) {
+        monaco.editor.setModelMarkers(model, 'devworkspace', []);
+      }
     }
   };
 
@@ -241,13 +259,16 @@ export function CodeFormatter() {
         </div>
         
         <div className="flex items-center space-x-4">
-          {isValid === true ? (
+          {!isCodeEmpty && errors.length === 0 ? (
             <div className="flex items-center text-[13px] text-green-500 font-medium bg-green-500/10 px-2 py-1 rounded">
-              <CheckCircle2 className="w-4 h-4 mr-1.5" /> Valid {strategy.name}
+              <CheckCircle2 className="w-4 h-4 mr-1.5" /> 
+              {warnings.length > 0 ? `Valid ${strategy.name} (${warnings.length} Warnings)` : `Valid ${strategy.name}`}
             </div>
-          ) : isValid === false ? (
+          ) : !isCodeEmpty && errors.length > 0 ? (
             <div className="flex items-center text-[13px] text-red-500 font-medium bg-red-500/10 px-2 py-1 rounded">
-              <XCircle className="w-4 h-4 mr-1.5" /> {markers.length} {markers.length === 1 ? 'Error' : 'Errors'}
+              <XCircle className="w-4 h-4 mr-1.5 shrink-0" /> 
+              {errors.length} {errors.length === 1 ? 'Error' : 'Errors'}
+              {warnings.length > 0 && `, ${warnings.length} Warning${warnings.length === 1 ? '' : 's'}`}
             </div>
           ) : null}
           <Button onClick={copyToClipboard} variant="outline" size="sm" className="h-8 shadow-sm">
@@ -284,13 +305,13 @@ export function CodeFormatter() {
         <div className="flex items-center px-4 py-2 border-b bg-muted/5 shrink-0">
           <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest flex items-center">
             Problems
-            <span className="ml-2 bg-muted-foreground/20 text-muted-foreground rounded-full px-2 py-0.5 text-[10px]">
-              {markers.length}
+            <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] ${totalProblems > 0 ? 'bg-red-500/10 text-red-500 font-bold' : 'bg-muted-foreground/20 text-muted-foreground'}`}>
+              {totalProblems}
             </span>
           </span>
         </div>
         <div className="flex-1 overflow-y-auto p-2">
-          {markers.length === 0 ? (
+          {totalProblems === 0 ? (
             <div className="flex items-center justify-center h-full text-muted-foreground text-[13px]">
               No problems detected.
             </div>
