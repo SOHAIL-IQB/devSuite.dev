@@ -13,8 +13,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Save, Trash2, Plus, FolderOpen, Send } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Loader2, Save, Trash2, Plus, Send } from 'lucide-react';
+
 
 export function ApiWorkspace() {
   const { theme } = useThemeStore();
@@ -84,24 +84,9 @@ export function ApiWorkspace() {
   return (
     <div className="h-full w-full bg-muted/10 p-2">
       <ResizablePanelGroup direction="horizontal" className="h-full rounded-lg">
-        {/* LEFT SIDEBAR: History / Saved */}
-        <ResizablePanel defaultSize={18} minSize={15} maxSize={25} className="flex flex-col bg-background rounded-lg border shadow-sm overflow-hidden mr-2">
-          <div className="flex items-center justify-between p-3 border-b bg-muted/5">
-            <span className="font-semibold text-[11px] tracking-widest uppercase text-muted-foreground">Collections</span>
-            <Button variant="ghost" size="icon" className="h-6 w-6 rounded-md hover:bg-muted"><Plus className="w-3.5 h-3.5 text-foreground" /></Button>
-          </div>
-          <ScrollArea className="flex-1">
-            <div className="flex flex-col items-center justify-center p-6 text-center text-sm text-muted-foreground opacity-60 h-32">
-              <FolderOpen className="w-6 h-6 mb-2 stroke-[1.5]" />
-              <p className="text-[13px]">No collections</p>
-            </div>
-          </ScrollArea>
-        </ResizablePanel>
-
-      <ResizableHandle />
 
       {/* MAIN CONTENT */}
-      <ResizablePanel defaultSize={82} className="flex flex-col h-full overflow-hidden bg-background rounded-lg border shadow-sm">
+      <ResizablePanel defaultSize={100} className="flex flex-col h-full overflow-hidden bg-background rounded-lg border shadow-sm">
         
         {/* URL BAR - POSTMAN STYLE */}
         <div className="flex items-center p-3 border-b bg-background">
