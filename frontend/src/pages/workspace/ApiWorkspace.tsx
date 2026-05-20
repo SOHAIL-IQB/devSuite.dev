@@ -22,6 +22,7 @@ export function ApiWorkspace() {
   
   const [response, setResponse] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   const handleEditorWillMount = (monacoInstance: any) => {
     monacoInstance.editor.defineTheme('devworkspace-dark', {
@@ -81,58 +82,63 @@ export function ApiWorkspace() {
   };
 
   return (
-    <ResizablePanelGroup direction="horizontal" className="h-full rounded-lg border bg-background">
-      {/* LEFT SIDEBAR: History / Saved */}
-      <ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="flex flex-col">
-        <div className="flex items-center justify-between p-4 border-b">
-          <span className="font-semibold text-xs tracking-wider uppercase text-muted-foreground">Collections</span>
-          <Button variant="ghost" size="icon" className="h-6 w-6 rounded-md hover:bg-muted"><Plus className="w-4 h-4 text-foreground" /></Button>
-        </div>
-        <ScrollArea className="flex-1">
-          <div className="flex flex-col items-center justify-center p-8 text-center text-sm text-muted-foreground opacity-70 h-32">
-            <FolderOpen className="w-8 h-8 mb-2 stroke-[1.5]" />
-            <p>No collections yet</p>
+    <div className="h-full w-full bg-muted/10 p-2">
+      <ResizablePanelGroup direction="horizontal" className="h-full rounded-lg">
+        {/* LEFT SIDEBAR: History / Saved */}
+        <ResizablePanel defaultSize={18} minSize={15} maxSize={25} className="flex flex-col bg-background rounded-lg border shadow-sm overflow-hidden mr-2">
+          <div className="flex items-center justify-between p-3 border-b bg-muted/5">
+            <span className="font-semibold text-[11px] tracking-widest uppercase text-muted-foreground">Collections</span>
+            <Button variant="ghost" size="icon" className="h-6 w-6 rounded-md hover:bg-muted"><Plus className="w-3.5 h-3.5 text-foreground" /></Button>
           </div>
-        </ScrollArea>
-      </ResizablePanel>
+          <ScrollArea className="flex-1">
+            <div className="flex flex-col items-center justify-center p-6 text-center text-sm text-muted-foreground opacity-60 h-32">
+              <FolderOpen className="w-6 h-6 mb-2 stroke-[1.5]" />
+              <p className="text-[13px]">No collections</p>
+            </div>
+          </ScrollArea>
+        </ResizablePanel>
 
       <ResizableHandle />
 
       {/* MAIN CONTENT */}
-      <ResizablePanel defaultSize={80} className="flex flex-col h-full overflow-hidden">
+      <ResizablePanel defaultSize={82} className="flex flex-col h-full overflow-hidden bg-background rounded-lg border shadow-sm">
         
-        {/* URL BAR */}
-        <div className="flex items-center space-x-3 p-4 border-b bg-background">
-          <div className="flex flex-1 items-center bg-muted/30 border rounded-lg focus-within:ring-1 focus-within:ring-primary/30 focus-within:border-primary/50 transition-all shadow-sm overflow-hidden">
+        {/* URL BAR - POSTMAN STYLE */}
+        <div className="flex items-center p-3 border-b bg-background">
+          <div className="flex flex-1 items-center bg-muted/20 border rounded-lg focus-within:ring-2 focus-within:ring-primary/30 focus-within:border-primary/50 transition-all shadow-sm overflow-hidden h-11">
             <Select 
               value={activeRequest.method} 
               onValueChange={(val) => setActiveRequest({ method: val })}
             >
-              <SelectTrigger className="w-[110px] border-0 bg-transparent shadow-none focus:ring-0 font-semibold tracking-wide">
+              <SelectTrigger className="w-[110px] border-0 bg-transparent shadow-none focus:ring-0 text-[13px] font-bold tracking-wide h-full rounded-none hover:bg-muted/50 transition-colors">
                 <SelectValue placeholder="Method" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="GET" className="text-blue-500 font-semibold">GET</SelectItem>
-                <SelectItem value="POST" className="text-green-500 font-semibold">POST</SelectItem>
-                <SelectItem value="PUT" className="text-orange-500 font-semibold">PUT</SelectItem>
-                <SelectItem value="PATCH" className="text-yellow-500 font-semibold">PATCH</SelectItem>
-                <SelectItem value="DELETE" className="text-red-500 font-semibold">DELETE</SelectItem>
+                <SelectItem value="GET" className="text-blue-500 font-bold text-[13px]">GET</SelectItem>
+                <SelectItem value="POST" className="text-green-500 font-bold text-[13px]">POST</SelectItem>
+                <SelectItem value="PUT" className="text-orange-500 font-bold text-[13px]">PUT</SelectItem>
+                <SelectItem value="PATCH" className="text-yellow-500 font-bold text-[13px]">PATCH</SelectItem>
+                <SelectItem value="DELETE" className="text-red-500 font-bold text-[13px]">DELETE</SelectItem>
               </SelectContent>
             </Select>
-            <div className="w-px h-6 bg-border/60 mx-1"></div>
+            <div className="w-px h-6 bg-border mx-1"></div>
             <Input 
-              className="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 font-mono text-sm px-3 placeholder:text-muted-foreground/50" 
+              className="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 font-mono text-[13px] px-3 h-full placeholder:text-muted-foreground/50" 
               placeholder="https://api.example.com/v1/users" 
               value={activeRequest.url}
               onChange={(e) => setActiveRequest({ url: e.target.value })}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             />
+            <Button 
+              onClick={handleSend} 
+              disabled={isLoading} 
+              className="h-full rounded-none px-6 font-semibold tracking-wide border-l bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Send className="w-4 h-4 mr-2" /> Send</>}
+            </Button>
           </div>
           
-          <Button onClick={handleSend} disabled={isLoading} className="w-24 shadow-sm font-medium tracking-wide">
-            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Send className="w-4 h-4 mr-2" /> Send</>}
-          </Button>
-          <Button variant="outline" size="icon" className="shadow-sm">
+          <Button variant="outline" size="icon" className="ml-3 shadow-sm h-11 w-11 rounded-lg">
             <Save className="w-4 h-4 text-muted-foreground" />
           </Button>
         </div>
@@ -141,31 +147,31 @@ export function ApiWorkspace() {
         <ResizablePanelGroup direction="vertical" className="flex-1">
           
           {/* REQUEST EDITOR */}
-          <ResizablePanel defaultSize={50} className="flex flex-col">
+          <ResizablePanel defaultSize={50} className="flex flex-col bg-background">
             <Tabs defaultValue="body" className="flex-1 flex flex-col">
-              <div className="px-4 border-b flex items-center justify-between bg-muted/10">
-                <TabsList className="bg-transparent h-11 gap-4 p-0">
-                  <TabsTrigger value="params" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-1 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all">Params</TabsTrigger>
-                  <TabsTrigger value="headers" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-1 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all">Headers</TabsTrigger>
-                  <TabsTrigger value="auth" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-1 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all">Auth</TabsTrigger>
-                  <TabsTrigger value="body" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-1 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all">Body</TabsTrigger>
+              <div className="px-4 border-b bg-muted/5">
+                <TabsList className="bg-transparent h-10 gap-6 p-0 w-full justify-start">
+                  <TabsTrigger value="params" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-0 font-medium text-[13px] text-muted-foreground data-[state=active]:text-foreground transition-all">Params</TabsTrigger>
+                  <TabsTrigger value="headers" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-0 font-medium text-[13px] text-muted-foreground data-[state=active]:text-foreground transition-all">Headers</TabsTrigger>
+                  <TabsTrigger value="auth" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-0 font-medium text-[13px] text-muted-foreground data-[state=active]:text-foreground transition-all">Auth</TabsTrigger>
+                  <TabsTrigger value="body" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-0 font-medium text-[13px] text-muted-foreground data-[state=active]:text-foreground transition-all">Body</TabsTrigger>
                 </TabsList>
               </div>
 
               {/* BODY TAB */}
-              <TabsContent value="body" className="flex-1 mt-0 data-[state=active]:flex flex-col h-full">
-                <div className="p-3 border-b text-xs text-muted-foreground flex items-center bg-background">
+              <TabsContent value="body" className="flex-1 mt-0 data-[state=active]:flex flex-col h-full bg-background">
+                <div className="p-2.5 border-b text-[12px] text-muted-foreground flex items-center bg-background">
                   <span className="font-medium tracking-wide">Raw (JSON)</span>
                 </div>
                 <div className="flex-1 min-h-0 bg-background relative">
                   <Editor
                     height="100%"
                     language="json"
-                    theme={theme === 'dark' ? 'devworkspace-dark' : 'devworkspace-light'}
+                    theme={isDark ? 'devworkspace-dark' : 'devworkspace-light'}
                     value={activeRequest.body}
                     onChange={(val) => setActiveRequest({ body: val || '' })}
                     beforeMount={handleEditorWillMount}
-                    options={{ minimap: { enabled: false }, fontSize: 13, scrollBeyondLastLine: false, lineNumbersMinChars: 3, padding: { top: 12, bottom: 12 } }}
+                    options={{ minimap: { enabled: false }, fontSize: 13, scrollBeyondLastLine: false, lineNumbersMinChars: 4, padding: { top: 16, bottom: 16 }, scrollbar: { useShadows: false, verticalScrollbarSize: 8, horizontalScrollbarSize: 8 } }}
                     className="absolute inset-0"
                   />
                 </div>
@@ -212,41 +218,41 @@ export function ApiWorkspace() {
 
           {/* RESPONSE VIEWER */}
           <ResizablePanel defaultSize={50} className="flex flex-col bg-background">
-            <div className="h-12 border-b flex items-center justify-between px-5 bg-muted/5">
-              <span className="font-semibold text-xs tracking-wider uppercase text-muted-foreground">Response</span>
+            <div className="h-10 border-b flex items-center justify-between px-4 bg-muted/5">
+              <span className="font-semibold text-[11px] tracking-widest uppercase text-muted-foreground">Response</span>
               {response && (
-                <div className="flex items-center space-x-4 text-xs font-medium">
-                  <span className="flex items-center space-x-2 text-muted-foreground">
-                    <span>Status:</span>
-                    <Badge className={`${getStatusColor(response.status)} px-2 py-0.5 rounded shadow-sm`}>{response.status || 'ERROR'} {response.statusText}</Badge>
-                  </span>
-                  <span className="flex items-center space-x-1.5 text-muted-foreground">
-                    <span>Time:</span>
+                <div className="flex items-center space-x-3 text-[12px] font-medium">
+                  <div className="flex items-center space-x-1.5 bg-muted/30 px-2 py-0.5 rounded-md border">
+                    <span className="text-muted-foreground">Status</span>
+                    <Badge className={`${getStatusColor(response.status)} px-1.5 py-0 rounded-[4px] shadow-none h-4 text-[10px]`}>{response.status || 'ERROR'} {response.statusText}</Badge>
+                  </div>
+                  <div className="flex items-center space-x-1.5 bg-muted/30 px-2 py-0.5 rounded-md border">
+                    <span className="text-muted-foreground">Time</span>
                     <span className="text-green-500 font-mono tracking-tight">{response.timeMs}ms</span>
-                  </span>
+                  </div>
                 </div>
               )}
             </div>
-            <div className="flex-1 min-h-0 relative">
+            <div className="flex-1 min-h-0 relative bg-background">
               {isLoading ? (
                 <div className="flex h-full flex-col items-center justify-center text-muted-foreground space-y-4">
-                  <Loader2 className="w-8 h-8 animate-spin text-primary/50" />
-                  <span className="text-sm font-medium tracking-wide">Sending Request...</span>
+                  <Loader2 className="w-6 h-6 animate-spin text-primary/50" />
+                  <span className="text-[13px] font-medium tracking-wide">Sending Request...</span>
                 </div>
               ) : response ? (
                 <Editor
                   height="100%"
                   language="json"
-                  theme={theme === 'dark' ? 'devworkspace-dark' : 'devworkspace-light'}
+                  theme={isDark ? 'devworkspace-dark' : 'devworkspace-light'}
                   value={JSON.stringify(response.data || response.error, null, 2)}
                   beforeMount={handleEditorWillMount}
-                  options={{ readOnly: true, minimap: { enabled: false }, fontSize: 13, scrollBeyondLastLine: false, lineNumbersMinChars: 3, padding: { top: 12, bottom: 12 } }}
+                  options={{ readOnly: true, minimap: { enabled: false }, fontSize: 13, scrollBeyondLastLine: false, lineNumbersMinChars: 4, padding: { top: 16, bottom: 16 }, scrollbar: { useShadows: false, verticalScrollbarSize: 8, horizontalScrollbarSize: 8 } }}
                   className="absolute inset-0"
                 />
               ) : (
-                <div className="flex h-full flex-col items-center justify-center text-muted-foreground opacity-60 space-y-3">
-                  <Send className="w-10 h-10 stroke-[1.5]" />
-                  <span className="text-sm font-medium tracking-wide">Enter a URL and hit Send to get a response</span>
+                <div className="flex h-full flex-col items-center justify-center text-muted-foreground opacity-50 space-y-3">
+                  <Send className="w-8 h-8 stroke-[1.5]" />
+                  <span className="text-[13px] font-medium tracking-wide">Enter a URL and hit Send</span>
                 </div>
               )}
             </div>
@@ -254,5 +260,6 @@ export function ApiWorkspace() {
         </ResizablePanelGroup>
       </ResizablePanel>
     </ResizablePanelGroup>
+    </div>
   );
 }
