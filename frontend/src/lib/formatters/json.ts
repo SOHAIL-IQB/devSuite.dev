@@ -1,4 +1,4 @@
-import type { FormatterStrategy, FormatterResult } from './types';
+import type { FormatterStrategy, FormatterResult, DiagnosticMarker } from './types';
 
 export const jsonFormatter: FormatterStrategy = {
   id: 'json',
@@ -35,5 +35,9 @@ export const jsonFormatter: FormatterStrategy = {
         error: e.message
       };
     }
+  },
+  validate: async (): Promise<DiagnosticMarker[]> => {
+    // Monaco natively provides JSON syntax and semantic validation.
+    return [];
   }
 };

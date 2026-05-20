@@ -1,4 +1,4 @@
-import type { FormatterStrategy, FormatterResult } from './types';
+import type { FormatterStrategy, FormatterResult, DiagnosticMarker } from './types';
 
 export const htmlFormatter: FormatterStrategy = {
   id: 'html',
@@ -18,6 +18,10 @@ export const htmlFormatter: FormatterStrategy = {
     } catch (e: any) {
       return { formatted: code, isValid: false, error: e.message };
     }
+  },
+  validate: async (): Promise<DiagnosticMarker[]> => {
+    // Monaco handles HTML natively
+    return [];
   }
 };
 
@@ -39,6 +43,10 @@ export const cssFormatter: FormatterStrategy = {
     } catch (e: any) {
       return { formatted: code, isValid: false, error: e.message };
     }
+  },
+  validate: async (): Promise<DiagnosticMarker[]> => {
+    // Monaco handles CSS natively
+    return [];
   }
 };
 
@@ -62,6 +70,10 @@ export const jsFormatter: FormatterStrategy = {
     } catch (e: any) {
       return { formatted: code, isValid: false, error: e.message };
     }
+  },
+  validate: async (): Promise<DiagnosticMarker[]> => {
+    // Monaco handles JS natively
+    return [];
   }
 };
 
@@ -85,6 +97,10 @@ export const tsFormatter: FormatterStrategy = {
     } catch (e: any) {
       return { formatted: code, isValid: false, error: e.message };
     }
+  },
+  validate: async (): Promise<DiagnosticMarker[]> => {
+    // Monaco handles TS natively (semantic + syntax)
+    return [];
   }
 };
 
@@ -105,6 +121,29 @@ export const markdownFormatter: FormatterStrategy = {
       return { formatted, isValid: true };
     } catch (e: any) {
       return { formatted: code, isValid: false, error: e.message };
+    }
+  },
+  validate: async (code: string): Promise<DiagnosticMarker[]> => {
+    if (!code.trim()) return [];
+    try {
+      const prettier = await import('prettier/standalone');
+      const markdownPlugin = await import('prettier/plugins/markdown');
+      await prettier.format(code, {
+        parser: 'markdown',
+        plugins: [markdownPlugin],
+      });
+      return [];
+    } catch (e: any) {
+      const line = e.loc?.start?.line || 1;
+      const col = e.loc?.start?.column || 1;
+      return [{
+        severity: 'error',
+        message: e.message.split('\n')[0] || 'Markdown syntax error',
+        startLineNumber: line,
+        startColumn: col,
+        endLineNumber: line,
+        endColumn: col + 1,
+      }];
     }
   }
 };

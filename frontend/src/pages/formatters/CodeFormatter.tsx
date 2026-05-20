@@ -1,10 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import Editor from '@monaco-editor/react';
-import type { Monaco } from '@monaco-editor/react';
+import Editor, { useMonaco } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import { useThemeStore } from '@/store/themeStore';
 import { Button } from '@/components/ui/button';
-import { Play, Minimize2, Copy, Trash2, CheckCircle2, AlertCircle, Code2, Loader2 } from 'lucide-react';
+import { Play, Minimize2, Copy, Trash2, CheckCircle2, Code2, Loader2, XCircle, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatters } from '@/lib/formatters';
@@ -28,17 +27,80 @@ export function CodeFormatter() {
   const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+  const monaco = useMonaco();
 
   const [activeLang, setActiveLang] = useState<FormatterType>('json');
+  const [markers, setMarkers] = useState<editor.IMarkerData[]>([]);
   const [isValid, setIsValid] = useState<boolean | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [isFormatting, setIsFormatting] = useState(false);
   const [content, setContent] = useState('');
 
   const debouncedContent = useDebounce(content, 500);
   const strategy = formatters[activeLang];
 
-  const handleEditorWillMount = (monacoInstance: Monaco) => {
+  // Enable Monaco Native TypeScript Semantic Validation
+  useEffect(() => {
+    if (monaco) {
+      const ts = (monaco.languages as any).typescript;
+      if (ts && ts.typescriptDefaults) {
+        ts.typescriptDefaults.setDiagnosticsOptions({
+          noSemanticValidation: false,
+          noSyntaxValidation: false,
+        });
+        ts.javascriptDefaults.setDiagnosticsOptions({
+          noSemanticValidation: false,
+          noSyntaxValidation: false,
+        });
+      }
+    }
+  }, [monaco]);
+
+  // Sync Monaco Markers
+  useEffect(() => {
+    if (!editorRef.current || !monaco) return;
+    const disposable = editorRef.current.onDidChangeModelDecorations(() => {
+      const model = editorRef.current?.getModel();
+      if (model) {
+        const allMarkers = monaco.editor.getModelMarkers({ resource: model.uri });
+        setMarkers(allMarkers);
+        const hasErrors = allMarkers.some(m => m.severity === monaco.MarkerSeverity.Error);
+        setIsValid(model.getValue().trim() ? !hasErrors : null);
+      }
+    });
+    return () => disposable.dispose();
+  }, [monaco]);
+
+  // Custom Background Validation
+  useEffect(() => {
+    if (!editorRef.current || !monaco) return;
+    const model = editorRef.current.getModel();
+    if (!model) return;
+
+    const validate = async () => {
+      if (!debouncedContent.trim()) {
+        monaco.editor.setModelMarkers(model, 'devworkspace', []);
+        return;
+      }
+      
+      const customDiagnostics = await strategy.validate(debouncedContent);
+      const monacoMarkers: editor.IMarkerData[] = customDiagnostics.map(d => ({
+        severity: d.severity === 'error' ? monaco.MarkerSeverity.Error : monaco.MarkerSeverity.Warning,
+        message: d.message,
+        startLineNumber: d.startLineNumber,
+        startColumn: d.startColumn,
+        endLineNumber: d.endLineNumber,
+        endColumn: d.endColumn,
+      }));
+      
+      // Inject custom markers alongside native ones
+      monaco.editor.setModelMarkers(model, 'devworkspace', monacoMarkers);
+    };
+    validate();
+  }, [debouncedContent, strategy, monaco]);
+
+
+  const handleEditorWillMount = (monacoInstance: typeof monaco) => {
+    if (!monacoInstance) return;
     monacoInstance.editor.defineTheme('devworkspace-dark', {
       base: 'vs-dark',
       inherit: true,
@@ -62,7 +124,6 @@ export function CodeFormatter() {
 
   const handleEditorMount = (editorInstance: editor.IStandaloneCodeEditor) => {
     editorRef.current = editorInstance;
-    // Set initial content based on language
     editorInstance.setValue(DEFAULT_CONTENT[activeLang]);
   };
 
@@ -82,23 +143,15 @@ export function CodeFormatter() {
   const formatCode = async () => {
     if (!editorRef.current) return;
     const inputVal = editorRef.current.getValue();
-    if (!inputVal.trim()) {
-      setError(null);
-      setIsValid(null);
-      return;
-    }
+    if (!inputVal.trim()) return;
 
     setIsFormatting(true);
     const result = await strategy.format(inputVal);
     
     if (result.isValid) {
       executeFormat(result.formatted);
-      setError(null);
-      setIsValid(true);
       toast.success(`${strategy.name} Formatted`);
     } else {
-      setError(result.error || 'Unknown format error');
-      setIsValid(false);
       toast.error('Formatting Failed');
     }
     setIsFormatting(false);
@@ -107,55 +160,22 @@ export function CodeFormatter() {
   const minifyCode = async () => {
     if (!editorRef.current || !strategy.minify) return;
     const inputVal = editorRef.current.getValue();
-    if (!inputVal.trim()) {
-      setError(null);
-      setIsValid(null);
-      return;
-    }
+    if (!inputVal.trim()) return;
 
     setIsFormatting(true);
     const result = await strategy.minify(inputVal);
     
     if (result.isValid) {
       executeFormat(result.formatted);
-      setError(null);
-      setIsValid(true);
       toast.success(`${strategy.name} Minified`);
     } else {
-      setError(result.error || 'Unknown format error');
-      setIsValid(false);
       toast.error('Minification Failed');
     }
     setIsFormatting(false);
   };
 
-  // Background Validation
-  useEffect(() => {
-    const validate = async () => {
-      if (!debouncedContent.trim()) {
-        setIsValid(null);
-        setError(null);
-        return;
-      }
-      
-      const result = await strategy.format(debouncedContent);
-      if (result.isValid) {
-        setIsValid(true);
-        setError(null);
-      } else {
-        setIsValid(false);
-        // Only show first line of error to keep UI clean
-        const shortError = result.error?.split('\n')[0] || 'Invalid syntax';
-        setError(shortError);
-      }
-    };
-    validate();
-  }, [debouncedContent, strategy]);
-
   const onLanguageChange = (val: FormatterType) => {
     setActiveLang(val);
-    setIsValid(null);
-    setError(null);
     if (editorRef.current) {
       editorRef.current.setValue(DEFAULT_CONTENT[val]);
     }
@@ -165,8 +185,6 @@ export function CodeFormatter() {
     if (editorRef.current) {
       editorRef.current.setValue('');
     }
-    setError(null);
-    setIsValid(null);
   };
 
   const copyToClipboard = () => {
@@ -175,6 +193,13 @@ export function CodeFormatter() {
     if (!outputVal) return;
     navigator.clipboard.writeText(outputVal);
     toast.success('Copied to clipboard');
+  };
+
+  const jumpToMarker = (marker: editor.IMarkerData) => {
+    if (!editorRef.current) return;
+    editorRef.current.setPosition({ lineNumber: marker.startLineNumber, column: marker.startColumn });
+    editorRef.current.revealLineInCenter(marker.startLineNumber);
+    editorRef.current.focus();
   };
 
   return (
@@ -216,13 +241,13 @@ export function CodeFormatter() {
         </div>
         
         <div className="flex items-center space-x-4">
-          {error ? (
-            <div className="flex items-center text-[13px] text-red-500 font-medium bg-red-500/10 px-2 py-1 rounded max-w-[400px] truncate">
-              <AlertCircle className="w-4 h-4 mr-1.5 shrink-0" /> <span className="truncate">{error}</span>
-            </div>
-          ) : isValid === true ? (
+          {isValid === true ? (
             <div className="flex items-center text-[13px] text-green-500 font-medium bg-green-500/10 px-2 py-1 rounded">
               <CheckCircle2 className="w-4 h-4 mr-1.5" /> Valid {strategy.name}
+            </div>
+          ) : isValid === false ? (
+            <div className="flex items-center text-[13px] text-red-500 font-medium bg-red-500/10 px-2 py-1 rounded">
+              <XCircle className="w-4 h-4 mr-1.5" /> {markers.length} {markers.length === 1 ? 'Error' : 'Errors'}
             </div>
           ) : null}
           <Button onClick={copyToClipboard} variant="outline" size="sm" className="h-8 shadow-sm">
@@ -251,6 +276,47 @@ export function CodeFormatter() {
               scrollBeyondLastLine: false
             }}
           />
+        </div>
+      </div>
+
+      {/* PROBLEMS PANEL */}
+      <div className="h-[200px] border-t bg-background flex flex-col shrink-0">
+        <div className="flex items-center px-4 py-2 border-b bg-muted/5 shrink-0">
+          <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest flex items-center">
+            Problems
+            <span className="ml-2 bg-muted-foreground/20 text-muted-foreground rounded-full px-2 py-0.5 text-[10px]">
+              {markers.length}
+            </span>
+          </span>
+        </div>
+        <div className="flex-1 overflow-y-auto p-2">
+          {markers.length === 0 ? (
+            <div className="flex items-center justify-center h-full text-muted-foreground text-[13px]">
+              No problems detected.
+            </div>
+          ) : (
+            markers.map((marker, idx) => (
+              <div 
+                key={idx} 
+                className="flex items-start p-2 hover:bg-muted/50 rounded cursor-pointer transition-colors"
+                onClick={() => jumpToMarker(marker)}
+              >
+                {marker.severity === monaco?.MarkerSeverity.Error ? (
+                  <XCircle className="w-4 h-4 text-red-500 mt-0.5 mr-3 shrink-0" />
+                ) : (
+                  <AlertTriangle className="w-4 h-4 text-yellow-500 mt-0.5 mr-3 shrink-0" />
+                )}
+                <div className="flex flex-col">
+                  <span className="text-[13px] text-foreground font-medium break-words leading-snug">
+                    {marker.message}
+                  </span>
+                  <span className="text-[11px] text-muted-foreground mt-1">
+                    [Line {marker.startLineNumber}, Col {marker.startColumn}]
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
