@@ -23,6 +23,33 @@ export function ApiWorkspace() {
   const [response, setResponse] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  const handleEditorWillMount = (monacoInstance: any) => {
+    monacoInstance.editor.defineTheme('devworkspace-dark', {
+      base: 'vs-dark',
+      inherit: true,
+      rules: [],
+      colors: {
+        'editor.background': '#09090b', // Tailwind background
+        'editor.lineHighlightBackground': '#18181b', // Tailwind muted
+        'editorLineNumber.foreground': '#52525b', // Tailwind muted-foreground
+        'editorIndentGuide.background': '#27272a', // Tailwind border
+        'editorSuggestWidget.background': '#09090b',
+        'editorSuggestWidget.border': '#27272a',
+      },
+    });
+    monacoInstance.editor.defineTheme('devworkspace-light', {
+      base: 'vs',
+      inherit: true,
+      rules: [],
+      colors: {
+        'editor.background': '#ffffff',
+        'editor.lineHighlightBackground': '#f4f4f5',
+        'editorLineNumber.foreground': '#a1a1aa',
+        'editorIndentGuide.background': '#e4e4e7',
+      },
+    });
+  };
+
   const handleSend = async () => {
     setIsLoading(true);
     setResponse(null);
@@ -69,7 +96,7 @@ export function ApiWorkspace() {
         </ScrollArea>
       </ResizablePanel>
 
-      <ResizableHandle withHandle />
+      <ResizableHandle />
 
       {/* MAIN CONTENT */}
       <ResizablePanel defaultSize={80} className="flex flex-col h-full overflow-hidden">
@@ -134,9 +161,10 @@ export function ApiWorkspace() {
                   <Editor
                     height="100%"
                     language="json"
-                    theme={theme === 'dark' ? 'vs-dark' : 'light'}
+                    theme={theme === 'dark' ? 'devworkspace-dark' : 'devworkspace-light'}
                     value={activeRequest.body}
                     onChange={(val) => setActiveRequest({ body: val || '' })}
+                    beforeMount={handleEditorWillMount}
                     options={{ minimap: { enabled: false }, fontSize: 13, scrollBeyondLastLine: false, lineNumbersMinChars: 3, padding: { top: 12, bottom: 12 } }}
                     className="absolute inset-0"
                   />
@@ -180,7 +208,7 @@ export function ApiWorkspace() {
             </Tabs>
           </ResizablePanel>
 
-          <ResizableHandle withHandle />
+          <ResizableHandle />
 
           {/* RESPONSE VIEWER */}
           <ResizablePanel defaultSize={50} className="flex flex-col bg-background">
@@ -209,8 +237,9 @@ export function ApiWorkspace() {
                 <Editor
                   height="100%"
                   language="json"
-                  theme={theme === 'dark' ? 'vs-dark' : 'light'}
+                  theme={theme === 'dark' ? 'devworkspace-dark' : 'devworkspace-light'}
                   value={JSON.stringify(response.data || response.error, null, 2)}
+                  beforeMount={handleEditorWillMount}
                   options={{ readOnly: true, minimap: { enabled: false }, fontSize: 13, scrollBeyondLastLine: false, lineNumbersMinChars: 3, padding: { top: 12, bottom: 12 } }}
                   className="absolute inset-0"
                 />
