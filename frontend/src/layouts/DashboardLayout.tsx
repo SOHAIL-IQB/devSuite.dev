@@ -1,4 +1,4 @@
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CommandPalette } from '@/components/CommandPalette';
 import { Toaster } from '@/components/ui/sonner';
@@ -34,28 +34,44 @@ const NAV_ITEMS = [
 export function DashboardLayout() {
   const { setTheme } = useThemeStore();
 
-  const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-background border-r">
-      <div className="p-4 flex items-center space-x-2 font-bold text-lg border-b">
-        <div className="w-6 h-6 bg-primary rounded-md flex items-center justify-center">
-          <Terminal className="w-4 h-4 text-primary-foreground" />
+  const SidebarContent = () => {
+    const location = useLocation();
+    
+    return (
+      <div className="flex flex-col h-full bg-muted/30 border-r">
+        <div className="h-14 px-5 flex items-center space-x-2 border-b font-semibold tracking-tight">
+          <div className="w-6 h-6 bg-primary rounded-[6px] flex items-center justify-center shadow-sm">
+            <Terminal className="w-4 h-4 text-primary-foreground" />
+          </div>
+          <span className="text-sm">DevWorkspace</span>
         </div>
-        <span>DevWorkspace</span>
+        <div className="px-3 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+          Menu
+        </div>
+        <nav className="flex-1 px-2 space-y-1 overflow-y-auto mac-scrollbar">
+          {NAV_ITEMS.map((item) => {
+            const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
+            return (
+              <Link 
+                key={item.path} 
+                to={item.path}
+                className={`flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                  isActive 
+                    ? 'bg-primary/10 text-primary shadow-sm ring-1 ring-primary/20' 
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                }`}
+              >
+                <div className={`${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
+                  {item.icon}
+                </div>
+                <span>{item.name}</span>
+              </Link>
+            );
+          })}
+        </nav>
       </div>
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-        {NAV_ITEMS.map((item) => (
-          <Link 
-            key={item.path} 
-            to={item.path}
-            className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-secondary text-sm font-medium transition-colors"
-          >
-            {item.icon}
-            <span>{item.name}</span>
-          </Link>
-        ))}
-      </nav>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="flex h-screen w-full bg-background text-foreground overflow-hidden">
@@ -114,7 +130,7 @@ export function DashboardLayout() {
         </header>
 
         {/* Content Area with Framer Motion */}
-        <div className="flex-1 overflow-auto p-4 md:p-6 bg-muted/20">
+        <div className="flex-1 overflow-auto bg-background mac-scrollbar">
           <AnimatePresence mode="wait">
             <motion.div
               initial={{ opacity: 0, y: 10 }}

@@ -32,7 +32,7 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
 
-    --radius: 0.5rem;
+    --radius: 0.4rem;
   }
 
   .dark {
@@ -71,6 +71,25 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased selection:bg-primary/20;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-background/80 backdrop-blur-md border border-white/10 shadow-sm;
+  }
+  .mac-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .mac-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .mac-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/20 rounded-full;
+  }
+  .mac-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/40;
   }
 }
