@@ -14,10 +14,10 @@ export function FormattersWorkspace() {
   const location = useLocation();
 
   return (
-    <div className="h-full w-full bg-muted/10 p-2">
-      <ResizablePanelGroup direction="horizontal" className="h-full rounded-lg">
+    <div className="h-full w-full bg-muted/10 p-2 overflow-hidden flex flex-col min-h-0">
+      <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0 rounded-lg">
         {/* LEFT SIDEBAR: Tools Menu */}
-        <ResizablePanel defaultSize={18} minSize={15} maxSize={25} className="flex flex-col bg-background rounded-lg border shadow-sm overflow-hidden mr-2">
+        <ResizablePanel defaultSize={18} minSize={15} maxSize={25} className="flex flex-col bg-background rounded-lg border shadow-sm overflow-hidden mr-2 min-h-0">
           <div className="flex items-center p-4 border-b bg-muted/5 h-14">
             <span className="font-semibold text-[11px] tracking-widest uppercase text-muted-foreground">Utilities</span>
           </div>
@@ -45,7 +45,7 @@ export function FormattersWorkspace() {
         </ResizablePanel>
 
         {/* MAIN CONTENT AREA */}
-        <ResizablePanel defaultSize={100} className="flex flex-col h-full overflow-hidden bg-background rounded-lg border shadow-sm">
+        <ResizablePanel defaultSize={100} className="flex flex-col h-full overflow-hidden bg-background rounded-lg border shadow-sm min-h-0 relative">
           <Outlet />
         </ResizablePanel>
       </ResizablePanelGroup>

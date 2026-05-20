@@ -41,30 +41,29 @@ export function JsonDiff() {
     diffEditorRef.current = editorInstance;
   };
 
+  const executeFormatInPlace = (ed: editor.IStandaloneCodeEditor) => {
+    const model = ed.getModel();
+    if (!model) return;
+    const val = ed.getValue();
+    if (!val.trim()) return;
+
+    try {
+      const formatted = JSON.stringify(JSON.parse(val), null, 2);
+      ed.pushUndoStop();
+      ed.executeEdits("formatter", [{
+        range: model.getFullModelRange(),
+        text: formatted
+      }]);
+      ed.pushUndoStop();
+    } catch (e) {
+      // ignore parse errors if they occur
+    }
+  };
+
   const formatBoth = () => {
     if (!diffEditorRef.current) return;
-    
-    const originalEditor = diffEditorRef.current.getOriginalEditor();
-    const modifiedEditor = diffEditorRef.current.getModifiedEditor();
-    
-    const originalVal = originalEditor.getValue();
-    const modifiedVal = modifiedEditor.getValue();
-
-    try {
-      if (originalVal.trim()) {
-        originalEditor.setValue(JSON.stringify(JSON.parse(originalVal), null, 2));
-      }
-    } catch (e) {
-      // ignore parse errors
-    }
-
-    try {
-      if (modifiedVal.trim()) {
-        modifiedEditor.setValue(JSON.stringify(JSON.parse(modifiedVal), null, 2));
-      }
-    } catch (e) {
-      // ignore parse errors
-    }
+    executeFormatInPlace(diffEditorRef.current.getOriginalEditor());
+    executeFormatInPlace(diffEditorRef.current.getModifiedEditor());
   };
 
   const clear = () => {
@@ -75,7 +74,6 @@ export function JsonDiff() {
 
   useEffect(() => {
     return () => {
-      // Cleanup to prevent memory leaks if component unmounts
       if (diffEditorRef.current) {
         diffEditorRef.current.dispose();
       }
@@ -83,9 +81,9 @@ export function JsonDiff() {
   }, []);
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full bg-background overflow-hidden min-h-0">
       {/* TOOLBAR */}
-      <div className="flex items-center justify-between p-3 border-b bg-muted/5 h-14">
+      <div className="flex items-center justify-between p-3 border-b bg-muted/5 h-14 shrink-0">
         <div className="flex items-center space-x-2">
           <Button onClick={formatBoth} size="sm" className="h-8 shadow-sm">
             <FileJson className="w-3.5 h-3.5 mr-1.5" /> Format Both
@@ -101,24 +99,29 @@ export function JsonDiff() {
       </div>
 
       {/* DIFF VIEWER */}
-      <div className="flex-1 min-h-0 bg-background relative">
-        <div className="absolute top-2 left-4 z-10 text-[11px] font-semibold text-muted-foreground tracking-widest uppercase pointer-events-none">Original</div>
-        <div className="absolute top-2 right-4 z-10 text-[11px] font-semibold text-muted-foreground tracking-widest uppercase pointer-events-none">Modified</div>
-        <DiffEditor
-          height="100%"
-          language="json"
-          theme={isDark ? 'devworkspace-dark' : 'devworkspace-light'}
-          original={INITIAL_ORIGINAL}
-          modified={INITIAL_MODIFIED}
-          beforeMount={handleEditorWillMount}
-          onMount={handleEditorMount}
-          options={{
-            renderSideBySide: true,
-            minimap: { enabled: false },
-            fontSize: 13,
-            padding: { top: 32, bottom: 16 }
-          }}
-        />
+      <div className="flex-1 min-h-0 bg-background relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute top-2 left-4 z-10 text-[11px] font-semibold text-muted-foreground tracking-widest uppercase pointer-events-none">Original</div>
+          <div className="absolute top-2 right-4 z-10 text-[11px] font-semibold text-muted-foreground tracking-widest uppercase pointer-events-none">Modified</div>
+          <DiffEditor
+            height="100%"
+            language="json"
+            theme={isDark ? 'devworkspace-dark' : 'devworkspace-light'}
+            original={INITIAL_ORIGINAL}
+            modified={INITIAL_MODIFIED}
+            beforeMount={handleEditorWillMount}
+            onMount={handleEditorMount}
+            options={{
+              renderSideBySide: true,
+              minimap: { enabled: false },
+              fontSize: 13,
+              padding: { top: 32, bottom: 16 },
+              fixedOverflowWidgets: true,
+              automaticLayout: true,
+              scrollBeyondLastLine: false
+            }}
+          />
+        </div>
       </div>
     </div>
   );

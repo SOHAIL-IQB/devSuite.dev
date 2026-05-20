@@ -152,9 +152,9 @@ export function JsonToCsv() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full bg-background overflow-hidden min-h-0">
       {/* TOOLBAR */}
-      <div className="flex items-center justify-between p-3 border-b bg-muted/5 h-14">
+      <div className="flex items-center justify-between p-3 border-b bg-muted/5 h-14 shrink-0">
         <div className="flex items-center space-x-2">
           <Button onClick={convertToCsv} size="sm" className="h-8 shadow-sm">
             <Play className="w-3.5 h-3.5 mr-1.5" /> Convert to CSV
@@ -180,33 +180,52 @@ export function JsonToCsv() {
       </div>
 
       {/* SPLIT PANE */}
-      <ResizablePanelGroup direction="horizontal" className="flex-1">
-        <ResizablePanel defaultSize={50} className="flex flex-col relative">
-          <div className="absolute top-2 right-4 z-10 text-[11px] font-semibold text-muted-foreground tracking-widest uppercase pointer-events-none">JSON Array Input</div>
-          <Editor
-            height="100%"
-            language="json"
-            theme={isDark ? 'devworkspace-dark' : 'devworkspace-light'}
-            defaultValue={'[\n  { "id": 1, "name": "Alice", "role": "Admin", "address": { "city": "NY" } },\n  { "id": 2, "name": "Bob", "role": "User" }\n]'}
-            onMount={(editor) => inputEditorRef.current = editor}
-            beforeMount={handleEditorWillMount}
-            options={{ minimap: { enabled: false }, fontSize: 13, padding: { top: 32, bottom: 16 } }}
-          />
+      <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0 overflow-hidden">
+        <ResizablePanel defaultSize={50} className="flex flex-col relative overflow-hidden min-h-0">
+          <div className="absolute inset-0">
+            <div className="absolute top-2 right-4 z-10 text-[11px] font-semibold text-muted-foreground tracking-widest uppercase pointer-events-none">JSON Array Input</div>
+            <Editor
+              height="100%"
+              language="json"
+              theme={isDark ? 'devworkspace-dark' : 'devworkspace-light'}
+              defaultValue={'[\n  { "id": 1, "name": "Alice", "role": "Admin", "address": { "city": "NY" } },\n  { "id": 2, "name": "Bob", "role": "User" }\n]'}
+              onMount={(editor) => inputEditorRef.current = editor}
+              beforeMount={handleEditorWillMount}
+              options={{ 
+                minimap: { enabled: false }, 
+                fontSize: 13, 
+                padding: { top: 32, bottom: 16 },
+                fixedOverflowWidgets: true,
+                automaticLayout: true,
+                scrollBeyondLastLine: false
+              }}
+            />
+          </div>
         </ResizablePanel>
         
         <ResizableHandle />
         
-        <ResizablePanel defaultSize={50} className="flex flex-col relative bg-muted/5 border-l">
-          <div className="absolute top-2 right-4 z-10 text-[11px] font-semibold text-muted-foreground tracking-widest uppercase pointer-events-none">CSV Output</div>
-          <Editor
-            height="100%"
-            language="csv"
-            theme={isDark ? 'devworkspace-dark' : 'devworkspace-light'}
-            defaultValue=""
-            onMount={(editor) => outputEditorRef.current = editor}
-            beforeMount={handleEditorWillMount}
-            options={{ readOnly: true, minimap: { enabled: false }, fontSize: 13, padding: { top: 32, bottom: 16 } }}
-          />
+        <ResizablePanel defaultSize={50} className="flex flex-col relative bg-muted/5 border-l overflow-hidden min-h-0">
+          <div className="absolute inset-0">
+            <div className="absolute top-2 right-4 z-10 text-[11px] font-semibold text-muted-foreground tracking-widest uppercase pointer-events-none">CSV Output</div>
+            <Editor
+              height="100%"
+              language="csv"
+              theme={isDark ? 'devworkspace-dark' : 'devworkspace-light'}
+              defaultValue=""
+              onMount={(editor) => outputEditorRef.current = editor}
+              beforeMount={handleEditorWillMount}
+              options={{ 
+                readOnly: true, 
+                minimap: { enabled: false }, 
+                fontSize: 13, 
+                padding: { top: 32, bottom: 16 },
+                fixedOverflowWidgets: true,
+                automaticLayout: true,
+                scrollBeyondLastLine: false
+              }}
+            />
+          </div>
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>

@@ -5,17 +5,15 @@ import type { editor } from 'monaco-editor';
 import { useThemeStore } from '@/store/themeStore';
 import { Button } from '@/components/ui/button';
 import { Play, Minimize2, Copy, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { toast } from 'sonner';
 
 export function JsonFormatter() {
   const { theme } = useThemeStore();
   const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
-  const inputEditorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
-  const outputEditorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 
-  const [hasOutput, setHasOutput] = useState(false);
+  const [isValid, setIsValid] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleEditorWillMount = (monacoInstance: Monaco) => {
@@ -40,78 +38,86 @@ export function JsonFormatter() {
     });
   };
 
-  const handleInputMount = (editorInstance: editor.IStandaloneCodeEditor) => {
-    inputEditorRef.current = editorInstance;
+  const handleEditorMount = (editorInstance: editor.IStandaloneCodeEditor) => {
+    editorRef.current = editorInstance;
   };
 
-  const handleOutputMount = (editorInstance: editor.IStandaloneCodeEditor) => {
-    outputEditorRef.current = editorInstance;
+  const executeFormat = (formattedText: string) => {
+    if (!editorRef.current) return;
+    const model = editorRef.current.getModel();
+    if (!model) return;
+    
+    editorRef.current.pushUndoStop();
+    editorRef.current.executeEdits("formatter", [{
+      range: model.getFullModelRange(),
+      text: formattedText
+    }]);
+    editorRef.current.pushUndoStop();
   };
 
   const formatJson = () => {
-    if (!inputEditorRef.current || !outputEditorRef.current) return;
-    const inputVal = inputEditorRef.current.getValue();
+    if (!editorRef.current) return;
+    const inputVal = editorRef.current.getValue();
     if (!inputVal.trim()) {
       setError(null);
-      setHasOutput(false);
-      outputEditorRef.current.setValue('');
+      setIsValid(false);
       return;
     }
 
     try {
       const parsed = JSON.parse(inputVal);
-      outputEditorRef.current.setValue(JSON.stringify(parsed, null, 2));
+      executeFormat(JSON.stringify(parsed, null, 2));
       setError(null);
-      setHasOutput(true);
+      setIsValid(true);
     } catch (e: any) {
       setError(e.message);
-      setHasOutput(false);
+      setIsValid(false);
     }
   };
 
   const minifyJson = () => {
-    if (!inputEditorRef.current || !outputEditorRef.current) return;
-    const inputVal = inputEditorRef.current.getValue();
+    if (!editorRef.current) return;
+    const inputVal = editorRef.current.getValue();
     if (!inputVal.trim()) {
       setError(null);
-      setHasOutput(false);
-      outputEditorRef.current.setValue('');
+      setIsValid(false);
       return;
     }
 
     try {
       const parsed = JSON.parse(inputVal);
-      outputEditorRef.current.setValue(JSON.stringify(parsed));
+      executeFormat(JSON.stringify(parsed));
       setError(null);
-      setHasOutput(true);
+      setIsValid(true);
     } catch (e: any) {
       setError(e.message);
-      setHasOutput(false);
+      setIsValid(false);
     }
   };
 
   const clear = () => {
-    if (inputEditorRef.current) inputEditorRef.current.setValue('');
-    if (outputEditorRef.current) outputEditorRef.current.setValue('');
+    if (editorRef.current) {
+      editorRef.current.setValue('');
+    }
     setError(null);
-    setHasOutput(false);
+    setIsValid(false);
   };
 
   const copyToClipboard = () => {
-    if (!outputEditorRef.current || !hasOutput) return;
-    const outputVal = outputEditorRef.current.getValue();
+    if (!editorRef.current) return;
+    const outputVal = editorRef.current.getValue();
     if (!outputVal) return;
     navigator.clipboard.writeText(outputVal);
     toast.success('Copied to clipboard');
   };
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full bg-background overflow-hidden min-h-0">
       {/* TOOLBAR */}
-      <div className="flex items-center justify-between p-3 border-b bg-muted/5 h-14">
+      <div className="flex items-center justify-between p-3 border-b bg-muted/5 h-14 shrink-0">
         <div className="flex items-center space-x-2">
           <Button onClick={formatJson} size="sm" className="h-8 shadow-sm">
-            <Play className="w-3.5 h-3.5 mr-1.5" /> Format
+            <Play className="w-3.5 h-3.5 mr-1.5" /> Format In-Place
           </Button>
           <Button onClick={minifyJson} variant="outline" size="sm" className="h-8 shadow-sm">
             <Minimize2 className="w-3.5 h-3.5 mr-1.5" /> Minify
@@ -126,47 +132,41 @@ export function JsonFormatter() {
             <div className="flex items-center text-[13px] text-red-500 font-medium bg-red-500/10 px-2 py-1 rounded">
               <AlertCircle className="w-4 h-4 mr-1.5" /> Invalid JSON
             </div>
-          ) : hasOutput && (
+          ) : isValid && (
             <div className="flex items-center text-[13px] text-green-500 font-medium">
               <CheckCircle2 className="w-4 h-4 mr-1.5" /> Valid JSON
             </div>
           )}
-          <Button onClick={copyToClipboard} variant="outline" size="sm" className="h-8 shadow-sm" disabled={!hasOutput}>
+          <Button onClick={copyToClipboard} variant="outline" size="sm" className="h-8 shadow-sm">
             <Copy className="w-3.5 h-3.5 mr-1.5" /> Copy
           </Button>
         </div>
       </div>
 
-      {/* SPLIT PANE */}
-      <ResizablePanelGroup direction="horizontal" className="flex-1">
-        <ResizablePanel defaultSize={50} className="flex flex-col relative">
-          <div className="absolute top-2 right-4 z-10 text-[11px] font-semibold text-muted-foreground tracking-widest uppercase pointer-events-none">Input</div>
+      {/* SINGLE PANE EDITOR */}
+      <div className="flex-1 min-h-0 relative bg-background overflow-hidden">
+        <div className="absolute inset-0">
           <Editor
             height="100%"
             language="json"
             theme={isDark ? 'devworkspace-dark' : 'devworkspace-light'}
-            defaultValue=""
+            defaultValue={'{\n  "status": "ready",\n  "message": "Paste your JSON here..."\n}'}
             beforeMount={handleEditorWillMount}
-            onMount={handleInputMount}
-            options={{ minimap: { enabled: false }, fontSize: 13, padding: { top: 32, bottom: 16 } }}
+            onMount={handleEditorMount}
+            onChange={() => {
+              if (error) setError(null);
+            }}
+            options={{ 
+              minimap: { enabled: false }, 
+              fontSize: 13, 
+              padding: { top: 24, bottom: 24 },
+              fixedOverflowWidgets: true,
+              automaticLayout: true,
+              scrollBeyondLastLine: false
+            }}
           />
-        </ResizablePanel>
-        
-        <ResizableHandle />
-        
-        <ResizablePanel defaultSize={50} className="flex flex-col relative bg-muted/5 border-l">
-          <div className="absolute top-2 right-4 z-10 text-[11px] font-semibold text-muted-foreground tracking-widest uppercase pointer-events-none">Output</div>
-          <Editor
-            height="100%"
-            language="json"
-            theme={isDark ? 'devworkspace-dark' : 'devworkspace-light'}
-            defaultValue=""
-            beforeMount={handleEditorWillMount}
-            onMount={handleOutputMount}
-            options={{ readOnly: true, minimap: { enabled: false }, fontSize: 13, padding: { top: 32, bottom: 16 } }}
-          />
-        </ResizablePanel>
-      </ResizablePanelGroup>
+        </div>
+      </div>
     </div>
   );
 }
