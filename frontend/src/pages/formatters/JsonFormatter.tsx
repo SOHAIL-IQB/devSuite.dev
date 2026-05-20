@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Editor from '@monaco-editor/react';
+import type { Monaco } from '@monaco-editor/react';
+import type { editor } from 'monaco-editor';
 import { useThemeStore } from '@/store/themeStore';
 import { Button } from '@/components/ui/button';
 import { Play, Minimize2, Copy, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
@@ -10,11 +12,13 @@ export function JsonFormatter() {
   const { theme } = useThemeStore();
   const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
-  const [input, setInput] = useState('');
-  const [output, setOutput] = useState('');
+  const inputEditorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+  const outputEditorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+
+  const [hasOutput, setHasOutput] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleEditorWillMount = (monacoInstance: any) => {
+  const handleEditorWillMount = (monacoInstance: Monaco) => {
     monacoInstance.editor.defineTheme('devworkspace-dark', {
       base: 'vs-dark',
       inherit: true,
@@ -36,37 +40,68 @@ export function JsonFormatter() {
     });
   };
 
+  const handleInputMount = (editorInstance: editor.IStandaloneCodeEditor) => {
+    inputEditorRef.current = editorInstance;
+  };
+
+  const handleOutputMount = (editorInstance: editor.IStandaloneCodeEditor) => {
+    outputEditorRef.current = editorInstance;
+  };
+
   const formatJson = () => {
-    try {
-      if (!input.trim()) return;
-      const parsed = JSON.parse(input);
-      setOutput(JSON.stringify(parsed, null, 2));
+    if (!inputEditorRef.current || !outputEditorRef.current) return;
+    const inputVal = inputEditorRef.current.getValue();
+    if (!inputVal.trim()) {
       setError(null);
+      setHasOutput(false);
+      outputEditorRef.current.setValue('');
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(inputVal);
+      outputEditorRef.current.setValue(JSON.stringify(parsed, null, 2));
+      setError(null);
+      setHasOutput(true);
     } catch (e: any) {
       setError(e.message);
+      setHasOutput(false);
     }
   };
 
   const minifyJson = () => {
-    try {
-      if (!input.trim()) return;
-      const parsed = JSON.parse(input);
-      setOutput(JSON.stringify(parsed));
+    if (!inputEditorRef.current || !outputEditorRef.current) return;
+    const inputVal = inputEditorRef.current.getValue();
+    if (!inputVal.trim()) {
       setError(null);
+      setHasOutput(false);
+      outputEditorRef.current.setValue('');
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(inputVal);
+      outputEditorRef.current.setValue(JSON.stringify(parsed));
+      setError(null);
+      setHasOutput(true);
     } catch (e: any) {
       setError(e.message);
+      setHasOutput(false);
     }
   };
 
   const clear = () => {
-    setInput('');
-    setOutput('');
+    if (inputEditorRef.current) inputEditorRef.current.setValue('');
+    if (outputEditorRef.current) outputEditorRef.current.setValue('');
     setError(null);
+    setHasOutput(false);
   };
 
   const copyToClipboard = () => {
-    if (!output) return;
-    navigator.clipboard.writeText(output);
+    if (!outputEditorRef.current || !hasOutput) return;
+    const outputVal = outputEditorRef.current.getValue();
+    if (!outputVal) return;
+    navigator.clipboard.writeText(outputVal);
     toast.success('Copied to clipboard');
   };
 
@@ -91,12 +126,12 @@ export function JsonFormatter() {
             <div className="flex items-center text-[13px] text-red-500 font-medium bg-red-500/10 px-2 py-1 rounded">
               <AlertCircle className="w-4 h-4 mr-1.5" /> Invalid JSON
             </div>
-          ) : output && (
+          ) : hasOutput && (
             <div className="flex items-center text-[13px] text-green-500 font-medium">
               <CheckCircle2 className="w-4 h-4 mr-1.5" /> Valid JSON
             </div>
           )}
-          <Button onClick={copyToClipboard} variant="outline" size="sm" className="h-8 shadow-sm" disabled={!output}>
+          <Button onClick={copyToClipboard} variant="outline" size="sm" className="h-8 shadow-sm" disabled={!hasOutput}>
             <Copy className="w-3.5 h-3.5 mr-1.5" /> Copy
           </Button>
         </div>
@@ -105,14 +140,14 @@ export function JsonFormatter() {
       {/* SPLIT PANE */}
       <ResizablePanelGroup direction="horizontal" className="flex-1">
         <ResizablePanel defaultSize={50} className="flex flex-col relative">
-          <div className="absolute top-2 right-4 z-10 text-[11px] font-semibold text-muted-foreground tracking-widest uppercase">Input</div>
+          <div className="absolute top-2 right-4 z-10 text-[11px] font-semibold text-muted-foreground tracking-widest uppercase pointer-events-none">Input</div>
           <Editor
             height="100%"
             language="json"
             theme={isDark ? 'devworkspace-dark' : 'devworkspace-light'}
-            value={input}
-            onChange={(val) => setInput(val || '')}
+            defaultValue=""
             beforeMount={handleEditorWillMount}
+            onMount={handleInputMount}
             options={{ minimap: { enabled: false }, fontSize: 13, padding: { top: 32, bottom: 16 } }}
           />
         </ResizablePanel>
@@ -120,13 +155,14 @@ export function JsonFormatter() {
         <ResizableHandle />
         
         <ResizablePanel defaultSize={50} className="flex flex-col relative bg-muted/5 border-l">
-          <div className="absolute top-2 right-4 z-10 text-[11px] font-semibold text-muted-foreground tracking-widest uppercase">Output</div>
+          <div className="absolute top-2 right-4 z-10 text-[11px] font-semibold text-muted-foreground tracking-widest uppercase pointer-events-none">Output</div>
           <Editor
             height="100%"
             language="json"
             theme={isDark ? 'devworkspace-dark' : 'devworkspace-light'}
-            value={output}
+            defaultValue=""
             beforeMount={handleEditorWillMount}
+            onMount={handleOutputMount}
             options={{ readOnly: true, minimap: { enabled: false }, fontSize: 13, padding: { top: 32, bottom: 16 } }}
           />
         </ResizablePanel>

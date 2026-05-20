@@ -1,17 +1,21 @@
-import { useState } from 'react';
+import { useRef, useEffect } from 'react';
 import { DiffEditor } from '@monaco-editor/react';
+import type { Monaco } from '@monaco-editor/react';
+import type { editor } from 'monaco-editor';
 import { useThemeStore } from '@/store/themeStore';
 import { Button } from '@/components/ui/button';
 import { Trash2, FileJson } from 'lucide-react';
+
+const INITIAL_ORIGINAL = '{\n  "version": "1.0",\n  "status": "active"\n}';
+const INITIAL_MODIFIED = '{\n  "version": "1.1",\n  "status": "active",\n  "newField": true\n}';
 
 export function JsonDiff() {
   const { theme } = useThemeStore();
   const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
-  const [original, setOriginal] = useState('{\n  "version": "1.0",\n  "status": "active"\n}');
-  const [modified, setModified] = useState('{\n  "version": "1.1",\n  "status": "active",\n  "newField": true\n}');
+  const diffEditorRef = useRef<editor.IStandaloneDiffEditor | null>(null);
 
-  const handleEditorWillMount = (monacoInstance: any) => {
+  const handleEditorWillMount = (monacoInstance: Monaco) => {
     monacoInstance.editor.defineTheme('devworkspace-dark', {
       base: 'vs-dark',
       inherit: true,
@@ -33,19 +37,50 @@ export function JsonDiff() {
     });
   };
 
+  const handleEditorMount = (editorInstance: editor.IStandaloneDiffEditor) => {
+    diffEditorRef.current = editorInstance;
+  };
+
   const formatBoth = () => {
+    if (!diffEditorRef.current) return;
+    
+    const originalEditor = diffEditorRef.current.getOriginalEditor();
+    const modifiedEditor = diffEditorRef.current.getModifiedEditor();
+    
+    const originalVal = originalEditor.getValue();
+    const modifiedVal = modifiedEditor.getValue();
+
     try {
-      if (original) setOriginal(JSON.stringify(JSON.parse(original), null, 2));
-      if (modified) setModified(JSON.stringify(JSON.parse(modified), null, 2));
+      if (originalVal.trim()) {
+        originalEditor.setValue(JSON.stringify(JSON.parse(originalVal), null, 2));
+      }
     } catch (e) {
-      // ignore parse errors for formatting
+      // ignore parse errors
+    }
+
+    try {
+      if (modifiedVal.trim()) {
+        modifiedEditor.setValue(JSON.stringify(JSON.parse(modifiedVal), null, 2));
+      }
+    } catch (e) {
+      // ignore parse errors
     }
   };
 
   const clear = () => {
-    setOriginal('');
-    setModified('');
+    if (!diffEditorRef.current) return;
+    diffEditorRef.current.getOriginalEditor().setValue('');
+    diffEditorRef.current.getModifiedEditor().setValue('');
   };
+
+  useEffect(() => {
+    return () => {
+      // Cleanup to prevent memory leaks if component unmounts
+      if (diffEditorRef.current) {
+        diffEditorRef.current.dispose();
+      }
+    };
+  }, []);
 
   return (
     <div className="flex flex-col h-full bg-background">
@@ -67,28 +102,21 @@ export function JsonDiff() {
 
       {/* DIFF VIEWER */}
       <div className="flex-1 min-h-0 bg-background relative">
-        <div className="absolute top-2 left-4 z-10 text-[11px] font-semibold text-muted-foreground tracking-widest uppercase">Original</div>
-        <div className="absolute top-2 right-4 z-10 text-[11px] font-semibold text-muted-foreground tracking-widest uppercase">Modified</div>
+        <div className="absolute top-2 left-4 z-10 text-[11px] font-semibold text-muted-foreground tracking-widest uppercase pointer-events-none">Original</div>
+        <div className="absolute top-2 right-4 z-10 text-[11px] font-semibold text-muted-foreground tracking-widest uppercase pointer-events-none">Modified</div>
         <DiffEditor
           height="100%"
           language="json"
           theme={isDark ? 'devworkspace-dark' : 'devworkspace-light'}
-          original={original}
-          modified={modified}
+          original={INITIAL_ORIGINAL}
+          modified={INITIAL_MODIFIED}
           beforeMount={handleEditorWillMount}
+          onMount={handleEditorMount}
           options={{
             renderSideBySide: true,
             minimap: { enabled: false },
             fontSize: 13,
             padding: { top: 32, bottom: 16 }
-          }}
-          onMount={(editor) => {
-            editor.getOriginalEditor().onDidChangeModelContent(() => {
-              setOriginal(editor.getOriginalEditor().getValue());
-            });
-            editor.getModifiedEditor().onDidChangeModelContent(() => {
-              setModified(editor.getModifiedEditor().getValue());
-            });
           }}
         />
       </div>

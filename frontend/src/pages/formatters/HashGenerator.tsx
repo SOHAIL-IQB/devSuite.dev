@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Copy, Hash, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useDebounce } from '@/hooks/useDebounce';
 
 export function HashGenerator() {
   const [input, setInput] = useState('');
@@ -13,6 +14,8 @@ export function HashGenerator() {
     'SHA-384': '',
     'SHA-512': '',
   });
+
+  const debouncedInput = useDebounce(input, 300);
 
   const generateHashes = async (text: string) => {
     if (!text) {
@@ -46,8 +49,8 @@ export function HashGenerator() {
   };
 
   useEffect(() => {
-    generateHashes(input);
-  }, [input]);
+    generateHashes(debouncedInput);
+  }, [debouncedInput]);
 
   const copyToClipboard = (text: string, name: string) => {
     if (!text) return;

@@ -1,20 +1,44 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Editor from '@monaco-editor/react';
+import type { Monaco } from '@monaco-editor/react';
+import type { editor } from 'monaco-editor';
 import { useThemeStore } from '@/store/themeStore';
 import { Button } from '@/components/ui/button';
 import { Play, Copy, Trash2, Download, AlertCircle } from 'lucide-react';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { toast } from 'sonner';
 
+// Recursive flatten function for deeply nested objects
+const flattenObject = (ob: any): Record<string, any> => {
+  const toReturn: Record<string, any> = {};
+
+  for (const i in ob) {
+    if (!ob.hasOwnProperty(i)) continue;
+
+    if (typeof ob[i] === 'object' && ob[i] !== null && !Array.isArray(ob[i])) {
+      const flatObject = flattenObject(ob[i]);
+      for (const x in flatObject) {
+        if (!flatObject.hasOwnProperty(x)) continue;
+        toReturn[i + '.' + x] = flatObject[x];
+      }
+    } else {
+      toReturn[i] = ob[i];
+    }
+  }
+  return toReturn;
+};
+
 export function JsonToCsv() {
   const { theme } = useThemeStore();
   const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
-  const [input, setInput] = useState('[\n  { "id": 1, "name": "Alice", "role": "Admin" },\n  { "id": 2, "name": "Bob", "role": "User" }\n]');
-  const [output, setOutput] = useState('');
+  const inputEditorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+  const outputEditorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+
+  const [hasOutput, setHasOutput] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleEditorWillMount = (monacoInstance: any) => {
+  const handleEditorWillMount = (monacoInstance: Monaco) => {
     monacoInstance.editor.defineTheme('devworkspace-dark', {
       base: 'vs-dark',
       inherit: true,
@@ -37,58 +61,85 @@ export function JsonToCsv() {
   };
 
   const convertToCsv = () => {
+    if (!inputEditorRef.current || !outputEditorRef.current) return;
+    
+    const inputVal = inputEditorRef.current.getValue();
+    if (!inputVal.trim()) {
+      outputEditorRef.current.setValue('');
+      setHasOutput(false);
+      setError(null);
+      return;
+    }
+
     try {
-      if (!input.trim()) return;
-      const parsed = JSON.parse(input);
+      const parsed = JSON.parse(inputVal);
       
       if (!Array.isArray(parsed)) {
         throw new Error("Input must be an array of JSON objects.");
       }
       if (parsed.length === 0) {
-        setOutput('');
+        outputEditorRef.current.setValue('');
+        setHasOutput(false);
+        setError(null);
         return;
       }
 
-      const headers = Array.from(new Set(parsed.flatMap(Object.keys)));
+      // Flatten each object in the array to support nested objects safely
+      const flattenedArray = parsed.map(item => typeof item === 'object' && item !== null ? flattenObject(item) : item);
+
+      // Extract all unique headers across all flattened objects
+      const headers = Array.from(new Set(flattenedArray.flatMap(obj => typeof obj === 'object' ? Object.keys(obj) : [])));
       const csvRows = [];
       
       // Add Headers
-      csvRows.push(headers.map(h => `"${h.replace(/"/g, '""')}"`).join(','));
+      csvRows.push(headers.map(h => `"${String(h).replace(/"/g, '""')}"`).join(','));
 
       // Add Rows
-      for (const row of parsed) {
+      for (const row of flattenedArray) {
+        if (typeof row !== 'object' || row === null) {
+          csvRows.push(`"${String(row).replace(/"/g, '""')}"`);
+          continue;
+        }
+
         const values = headers.map(header => {
           const val = row[header];
           if (val === null || val === undefined) return '""';
-          const str = String(val);
-          // Escape quotes and wrap in quotes
+          const str = typeof val === 'object' ? JSON.stringify(val) : String(val); // Stringify arrays or strange objects left over
           return `"${str.replace(/"/g, '""')}"`;
         });
         csvRows.push(values.join(','));
       }
 
-      setOutput(csvRows.join('\n'));
+      outputEditorRef.current.setValue(csvRows.join('\n'));
       setError(null);
+      setHasOutput(true);
     } catch (e: any) {
       setError(e.message);
+      setHasOutput(false);
     }
   };
 
   const clear = () => {
-    setInput('');
-    setOutput('');
+    if (inputEditorRef.current) inputEditorRef.current.setValue('');
+    if (outputEditorRef.current) outputEditorRef.current.setValue('');
     setError(null);
+    setHasOutput(false);
   };
 
   const copyToClipboard = () => {
-    if (!output) return;
-    navigator.clipboard.writeText(output);
+    if (!outputEditorRef.current || !hasOutput) return;
+    const outputVal = outputEditorRef.current.getValue();
+    if (!outputVal) return;
+    navigator.clipboard.writeText(outputVal);
     toast.success('Copied CSV to clipboard');
   };
 
   const downloadCsv = () => {
-    if (!output) return;
-    const blob = new Blob([output], { type: 'text/csv' });
+    if (!outputEditorRef.current || !hasOutput) return;
+    const outputVal = outputEditorRef.current.getValue();
+    if (!outputVal) return;
+    
+    const blob = new Blob([outputVal], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -119,10 +170,10 @@ export function JsonToCsv() {
               <AlertCircle className="w-4 h-4 mr-1.5" /> {error}
             </div>
           )}
-          <Button onClick={copyToClipboard} variant="outline" size="sm" className="h-8 shadow-sm" disabled={!output}>
+          <Button onClick={copyToClipboard} variant="outline" size="sm" className="h-8 shadow-sm" disabled={!hasOutput}>
             <Copy className="w-3.5 h-3.5 mr-1.5" /> Copy
           </Button>
-          <Button onClick={downloadCsv} variant="outline" size="sm" className="h-8 shadow-sm" disabled={!output}>
+          <Button onClick={downloadCsv} variant="outline" size="sm" className="h-8 shadow-sm" disabled={!hasOutput}>
             <Download className="w-3.5 h-3.5 mr-1.5" /> Download
           </Button>
         </div>
@@ -131,13 +182,13 @@ export function JsonToCsv() {
       {/* SPLIT PANE */}
       <ResizablePanelGroup direction="horizontal" className="flex-1">
         <ResizablePanel defaultSize={50} className="flex flex-col relative">
-          <div className="absolute top-2 right-4 z-10 text-[11px] font-semibold text-muted-foreground tracking-widest uppercase">JSON Array Input</div>
+          <div className="absolute top-2 right-4 z-10 text-[11px] font-semibold text-muted-foreground tracking-widest uppercase pointer-events-none">JSON Array Input</div>
           <Editor
             height="100%"
             language="json"
             theme={isDark ? 'devworkspace-dark' : 'devworkspace-light'}
-            value={input}
-            onChange={(val) => setInput(val || '')}
+            defaultValue={'[\n  { "id": 1, "name": "Alice", "role": "Admin", "address": { "city": "NY" } },\n  { "id": 2, "name": "Bob", "role": "User" }\n]'}
+            onMount={(editor) => inputEditorRef.current = editor}
             beforeMount={handleEditorWillMount}
             options={{ minimap: { enabled: false }, fontSize: 13, padding: { top: 32, bottom: 16 } }}
           />
@@ -146,12 +197,13 @@ export function JsonToCsv() {
         <ResizableHandle />
         
         <ResizablePanel defaultSize={50} className="flex flex-col relative bg-muted/5 border-l">
-          <div className="absolute top-2 right-4 z-10 text-[11px] font-semibold text-muted-foreground tracking-widest uppercase">CSV Output</div>
+          <div className="absolute top-2 right-4 z-10 text-[11px] font-semibold text-muted-foreground tracking-widest uppercase pointer-events-none">CSV Output</div>
           <Editor
             height="100%"
             language="csv"
             theme={isDark ? 'devworkspace-dark' : 'devworkspace-light'}
-            value={output}
+            defaultValue=""
+            onMount={(editor) => outputEditorRef.current = editor}
             beforeMount={handleEditorWillMount}
             options={{ readOnly: true, minimap: { enabled: false }, fontSize: 13, padding: { top: 32, bottom: 16 } }}
           />
