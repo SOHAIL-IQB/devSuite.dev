@@ -7,7 +7,7 @@ import { ApiWorkspace } from '@/pages/workspace/ApiWorkspace';
 import { Login } from '@/pages/auth/Login';
 import { Register } from '@/pages/auth/Register';
 import { FormattersWorkspace } from '@/pages/formatters/FormattersWorkspace';
-import { JsonFormatter } from '@/pages/formatters/JsonFormatter';
+import { CodeFormatter } from '@/pages/formatters/CodeFormatter';
 import { JsonDiff } from '@/pages/formatters/JsonDiff';
 import { JsonToCsv } from '@/pages/formatters/JsonToCsv';
 import { UuidGenerator } from '@/pages/formatters/UuidGenerator';
@@ -35,8 +35,8 @@ export const router = createBrowserRouter([
             path: 'format',
             element: <FormattersWorkspace />,
             children: [
-              { index: true, element: <Navigate to="json-formatter" replace /> },
-              { path: 'json-formatter', element: <JsonFormatter /> },
+              { index: true, element: <Navigate to="code-formatter" replace /> },
+              { path: 'code-formatter', element: <CodeFormatter /> },
               { path: 'json-diff', element: <JsonDiff /> },
               { path: 'json-to-csv', element: <JsonToCsv /> },
               { path: 'uuid-generator', element: <UuidGenerator /> },

@@ -3,7 +3,7 @@ import { Braces, Diff, Table, Fingerprint, Hash } from 'lucide-react';
 import { ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 
 const FORMATTER_TOOLS = [
-  { name: 'JSON Formatter', path: '/format/json-formatter', icon: <Braces className="w-4 h-4" /> },
+  { name: 'Code Formatter', path: '/format/code-formatter', icon: <Braces className="w-4 h-4" /> },
   { name: 'JSON Diff', path: '/format/json-diff', icon: <Diff className="w-4 h-4" /> },
   { name: 'JSON to CSV', path: '/format/json-to-csv', icon: <Table className="w-4 h-4" /> },
   { name: 'UUID Generator', path: '/format/uuid-generator', icon: <Fingerprint className="w-4 h-4" /> },
