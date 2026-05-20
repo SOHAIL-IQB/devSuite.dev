@@ -12,6 +12,7 @@ import { JsonDiff } from '@/pages/formatters/JsonDiff';
 import { JsonToCsv } from '@/pages/formatters/JsonToCsv';
 import { UuidGenerator } from '@/pages/formatters/UuidGenerator';
 import { HashGenerator } from '@/pages/formatters/HashGenerator';
+import { NotesWorkspace } from '@/pages/notes/NotesWorkspace';
 import { Navigate } from 'react-router-dom';
 
 export const router = createBrowserRouter([
@@ -45,7 +46,7 @@ export const router = createBrowserRouter([
           },
           {
             path: 'notes',
-            element: <div className="p-8"><h2 className="text-2xl font-bold">Notes (Coming Soon)</h2></div>,
+            element: <NotesWorkspace />,
           },
           {
             path: 'settings',
