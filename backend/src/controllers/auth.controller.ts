@@ -198,3 +198,93 @@ export const me = async (req: Request, res: Response): Promise<void> => {
 
   res.json({ user });
 };
+
+const updateProfileSchema = z.object({
+  name: z.string().min(2),
+  email: z.string().email(),
+});
+
+const updatePasswordSchema = z.object({
+  currentPassword: z.string(),
+  newPassword: z.string().min(8),
+});
+
+export const updateProfile = async (req: Request, res: Response): Promise<void> => {
+  if (!req.user) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+  try {
+    const { name, email } = updateProfileSchema.parse(req.body);
+    
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing && existing.id !== req.user.userId) {
+      res.status(409).json({ error: 'Email already in use' });
+      return;
+    }
+
+    const user = await prisma.user.update({
+      where: { id: req.user.userId },
+      data: { name, email },
+      select: { id: true, name: true, email: true, createdAt: true },
+    });
+    res.json({ user });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: error.issues });
+    } else {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+};
+
+export const updatePassword = async (req: Request, res: Response): Promise<void> => {
+  if (!req.user) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+  try {
+    const { currentPassword, newPassword } = updatePasswordSchema.parse(req.body);
+    
+    const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    const isValid = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isValid) {
+      res.status(401).json({ error: 'Incorrect current password' });
+      return;
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+    await prisma.user.update({
+      where: { id: req.user.userId },
+      data: { passwordHash },
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: error.issues });
+    } else {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+};
+
+export const deleteAccount = async (req: Request, res: Response): Promise<void> => {
+  if (!req.user) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+  try {
+    await prisma.user.delete({ where: { id: req.user.userId } });
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

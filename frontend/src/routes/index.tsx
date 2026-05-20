@@ -13,6 +13,7 @@ import { JsonToCsv } from '@/pages/formatters/JsonToCsv';
 import { UuidGenerator } from '@/pages/formatters/UuidGenerator';
 import { HashGenerator } from '@/pages/formatters/HashGenerator';
 import { NotesWorkspace } from '@/pages/notes/NotesWorkspace';
+import { SettingsWorkspace } from '@/pages/settings/SettingsWorkspace';
 import { Navigate } from 'react-router-dom';
 
 export const router = createBrowserRouter([
@@ -50,7 +51,7 @@ export const router = createBrowserRouter([
           },
           {
             path: 'settings',
-            element: <div className="p-8"><h2 className="text-2xl font-bold">Settings (Coming Soon)</h2></div>,
+            element: <SettingsWorkspace />,
           }
         ],
       }
