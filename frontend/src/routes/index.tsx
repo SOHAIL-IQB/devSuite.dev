@@ -6,6 +6,13 @@ import { Home } from '@/pages/Home';
 import { ApiWorkspace } from '@/pages/workspace/ApiWorkspace';
 import { Login } from '@/pages/auth/Login';
 import { Register } from '@/pages/auth/Register';
+import { FormattersWorkspace } from '@/pages/formatters/FormattersWorkspace';
+import { JsonFormatter } from '@/pages/formatters/JsonFormatter';
+import { JsonDiff } from '@/pages/formatters/JsonDiff';
+import { JsonToCsv } from '@/pages/formatters/JsonToCsv';
+import { UuidGenerator } from '@/pages/formatters/UuidGenerator';
+import { HashGenerator } from '@/pages/formatters/HashGenerator';
+import { Navigate } from 'react-router-dom';
 
 export const router = createBrowserRouter([
   {
@@ -26,7 +33,15 @@ export const router = createBrowserRouter([
           },
           {
             path: 'format',
-            element: <div className="p-8"><h2 className="text-2xl font-bold">Formatters (Coming Soon)</h2></div>,
+            element: <FormattersWorkspace />,
+            children: [
+              { index: true, element: <Navigate to="json-formatter" replace /> },
+              { path: 'json-formatter', element: <JsonFormatter /> },
+              { path: 'json-diff', element: <JsonDiff /> },
+              { path: 'json-to-csv', element: <JsonToCsv /> },
+              { path: 'uuid-generator', element: <UuidGenerator /> },
+              { path: 'hash-generator', element: <HashGenerator /> },
+            ]
           },
           {
             path: 'notes',
