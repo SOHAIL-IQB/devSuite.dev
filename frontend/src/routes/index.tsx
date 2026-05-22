@@ -12,6 +12,8 @@ import { JsonDiff } from '@/pages/formatters/JsonDiff';
 import { JsonToCsv } from '@/pages/formatters/JsonToCsv';
 import { UuidGenerator } from '@/pages/formatters/UuidGenerator';
 import { HashGenerator } from '@/pages/formatters/HashGenerator';
+import { JwtDecoder } from '@/pages/formatters/JwtDecoder';
+import { Base64Encoder } from '@/pages/formatters/Base64Encoder';
 import { NotesWorkspace } from '@/pages/notes/NotesWorkspace';
 import { SettingsWorkspace } from '@/pages/settings/SettingsWorkspace';
 import { Navigate } from 'react-router-dom';
@@ -52,6 +54,14 @@ export const router = createBrowserRouter([
           {
             path: 'settings',
             element: <SettingsWorkspace />,
+          },
+          {
+            path: 'jwt',
+            element: <JwtDecoder />,
+          },
+          {
+            path: 'base64',
+            element: <Base64Encoder />,
           }
         ],
       }

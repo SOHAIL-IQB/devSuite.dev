@@ -97,3 +97,21 @@ export const deleteRequest = async (req: Request, res: Response): Promise<void> 
   await prisma.apiRequest.delete({ where: { id } }).catch(() => {});
   res.json({ success: true });
 };
+
+export const getStats = async (req: Request, res: Response): Promise<void> => {
+  if (!req.user) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+  const requestsCount = await prisma.apiRequest.count({
+    where: {
+      workspace: {
+        userId: req.user.userId
+      }
+    }
+  });
+  
+  res.json({
+    apiRequests: requestsCount,
+  });
+};
