@@ -3,7 +3,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
 import { toast } from 'sonner';
 import { 
   Hash, 
@@ -245,26 +245,14 @@ export function Base64Encoder() {
               <span className="text-xs text-muted-foreground">{mode === 'encode' ? 'Raw Text' : 'Base64'}</span>
             </div>
             
-            <TooltipProvider delayDuration={300}>
-              <div className="flex items-center gap-1">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handlePaste}>
-                      <ClipboardPaste className="w-3.5 h-3.5 text-muted-foreground" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent><p className="text-xs">Paste</p></TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleClear}>
-                      <Trash2 className="w-3.5 h-3.5 text-muted-foreground" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent><p className="text-xs">Clear All</p></TooltipContent>
-                </Tooltip>
-              </div>
-            </TooltipProvider>
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handlePaste} title="Paste">
+                <ClipboardPaste className="w-3.5 h-3.5 text-muted-foreground" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleClear} title="Clear All">
+                <Trash2 className="w-3.5 h-3.5 text-muted-foreground" />
+              </Button>
+            </div>
           </div>
           
           <Textarea 
@@ -282,21 +270,15 @@ export function Base64Encoder() {
 
         {/* MIDDLE SWAP */}
         <div className="flex items-center justify-center shrink-0 py-2 md:py-0">
-          <TooltipProvider delayDuration={300}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  className="rounded-full shadow-sm"
-                  onClick={handleSwap}
-                >
-                  <ArrowRightLeft className="w-4 h-4 text-muted-foreground md:rotate-0 rotate-90" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent><p className="text-xs">Swap & Flip Mode</p></TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="rounded-full shadow-sm"
+            onClick={handleSwap}
+            title="Swap & Flip Mode"
+          >
+            <ArrowRightLeft className="w-4 h-4 text-muted-foreground md:rotate-0 rotate-90" />
+          </Button>
         </div>
 
         {/* OUTPUT PANE */}
@@ -307,26 +289,14 @@ export function Base64Encoder() {
               <span className="text-xs text-muted-foreground">{mode === 'encode' ? 'Base64' : 'Raw Text'}</span>
             </div>
             
-            <TooltipProvider delayDuration={300}>
-              <div className="flex items-center gap-1">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleCopy(output, 'Output')} disabled={!output}>
-                      <Copy className="w-3.5 h-3.5 text-muted-foreground" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent><p className="text-xs">Copy Output</p></TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleDownload} disabled={!output}>
-                      <Download className="w-3.5 h-3.5 text-muted-foreground" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent><p className="text-xs">Download Output</p></TooltipContent>
-                </Tooltip>
-              </div>
-            </TooltipProvider>
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleCopy(output, 'Output')} disabled={!output} title="Copy Output">
+                <Copy className="w-3.5 h-3.5 text-muted-foreground" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleDownload} disabled={!output} title="Download Output">
+                <Download className="w-3.5 h-3.5 text-muted-foreground" />
+              </Button>
+            </div>
           </div>
           
           <Textarea 
