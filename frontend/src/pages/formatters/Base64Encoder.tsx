@@ -116,10 +116,38 @@ export function Base64Encoder() {
 
   const handlePaste = async () => {
     try {
+      // Check permissions if supported (Chrome/Edge)
+      if (navigator.permissions && navigator.permissions.query) {
+        try {
+          const result = await navigator.permissions.query({ name: 'clipboard-read' as PermissionName });
+          if (result.state === 'denied') {
+            toast.error('Clipboard access denied. Please allow clipboard permissions in your browser settings.');
+            return;
+          }
+        } catch (e) {
+          // Safari/Firefox might not support querying 'clipboard-read'
+        }
+      }
+
+      if (!navigator.clipboard || !navigator.clipboard.readText) {
+        toast.error('Clipboard API is not supported in this browser or context (requires HTTPS).');
+        return;
+      }
+
       const text = await navigator.clipboard.readText();
-      setInput(text);
-    } catch (err) {
-      toast.error('Failed to read clipboard');
+      if (text !== undefined && text !== null) {
+        setInput(text);
+        toast.success('Pasted from clipboard');
+      } else {
+        toast.info('Clipboard is empty');
+      }
+    } catch (err: any) {
+      // Handle NotAllowedError (user denied permission or browser blocked it)
+      if (err.name === 'NotAllowedError' || err.message?.toLowerCase().includes('denied')) {
+        toast.error('Clipboard permission denied. Please use Ctrl/Cmd+V to paste or update site settings.');
+      } else {
+        toast.error(`Failed to read clipboard: ${err.message || 'Unknown error'}`);
+      }
     }
   };
 
