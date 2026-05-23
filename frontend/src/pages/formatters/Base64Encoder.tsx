@@ -114,23 +114,14 @@ export function Base64Encoder() {
     toast.success(`${label} copied to clipboard`);
   };
 
-  const handlePaste = async () => {
+  const handlePaste = async (e: React.MouseEvent) => {
+    e.preventDefault();
     try {
-      // Check permissions if supported (Chrome/Edge)
-      if (navigator.permissions && navigator.permissions.query) {
-        try {
-          const result = await navigator.permissions.query({ name: 'clipboard-read' as PermissionName });
-          if (result.state === 'denied') {
-            toast.error('Clipboard access denied. Please allow clipboard permissions in your browser settings.');
-            return;
-          }
-        } catch (e) {
-          // Safari/Firefox might not support querying 'clipboard-read'
-        }
-      }
-
+      // IMPORTANT: We must call readText() immediately. 
+      // Awaiting anything else before this (like permissions.query) destroys the transient user gesture
+      // context in Safari/Chrome, which forces the browser to show the native "Paste" popup.
       if (!navigator.clipboard || !navigator.clipboard.readText) {
-        toast.error('Clipboard API is not supported in this browser or context (requires HTTPS).');
+        toast.error('Clipboard API is not supported in this browser or requires a secure context (HTTPS).');
         return;
       }
 
