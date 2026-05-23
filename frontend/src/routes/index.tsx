@@ -15,6 +15,8 @@ import { HashGenerator } from '@/pages/formatters/HashGenerator';
 import { JwtDecoder } from '@/pages/formatters/JwtDecoder';
 import { Base64Encoder } from '@/pages/formatters/Base64Encoder';
 import { RegexTester } from '@/pages/formatters/RegexTester';
+import { EpochConverter } from '@/pages/formatters/EpochConverter';
+import { CronParser } from '@/pages/formatters/CronParser';
 import { NotesWorkspace } from '@/pages/notes/NotesWorkspace';
 import { SettingsWorkspace } from '@/pages/settings/SettingsWorkspace';
 import { Navigate } from 'react-router-dom';
@@ -67,6 +69,14 @@ export const router = createBrowserRouter([
           {
             path: 'regex',
             element: <RegexTester />,
+          },
+          {
+            path: 'time',
+            element: <EpochConverter />,
+          },
+          {
+            path: 'cron',
+            element: <CronParser />,
           }
         ],
       }

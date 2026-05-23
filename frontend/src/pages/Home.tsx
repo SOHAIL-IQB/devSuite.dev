@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Code2, Braces, BookText, Activity, Lock, Hash, Regex, Server } from 'lucide-react';
+import { Code2, Braces, BookText, Activity, Lock, Hash, Regex, Server, Clock, CalendarClock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { useNotesStore } from '@/store/notesStore';
@@ -42,6 +42,18 @@ const CARDS = [
     description: 'Test regular expressions against target strings.',
     icon: <Regex className="w-8 h-8 text-cyan-500" />,
     path: '/regex'
+  },
+  {
+    title: 'Epoch Converter',
+    description: 'Bi-directional Unix timestamp and date converter.',
+    icon: <Clock className="w-8 h-8 text-teal-500" />,
+    path: '/time'
+  },
+  {
+    title: 'Cron Parser',
+    description: 'Translate cron strings to plain English schedules.',
+    icon: <CalendarClock className="w-8 h-8 text-indigo-500" />,
+    path: '/cron'
   }
 ];
 
@@ -106,8 +118,8 @@ export function Home() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">9</div>
-            <p className="text-xs text-muted-foreground mt-1">Supported Languages</p>
+            <div className="text-3xl font-bold">10</div>
+            <p className="text-xs text-muted-foreground mt-1">Premium Utilities</p>
           </CardContent>
         </Card>
         <Card className="bg-primary/5 border-primary/20">
