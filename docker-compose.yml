@@ -1,26 +1,78 @@
+version: '3.8'
+
 services:
-  postgres:
+  db:
     image: postgres:15-alpine
-    container_name: devworkspace-postgres
-    ports:
-      - "5433:5432"
+    container_name: devsuite_db
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: devworkspace
-      POSTGRES_PASSWORD: devworkspace_password
-      POSTGRES_DB: devworkspace
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-devsuite}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
+    networks:
+      - devsuite_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-devsuite}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
-    container_name: devworkspace-redis
-    ports:
-      - "6380:6379"
-    volumes:
-      - redis_data:/data
+    container_name: devsuite_redis
     restart: unless-stopped
+    networks:
+      - devsuite_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: devsuite_backend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-devsuite}
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET:-your_super_secret_jwt_key_here}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - devsuite_net
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: devsuite_frontend
+    restart: unless-stopped
+    ports:
+      - "${PORT:-80}:80"
+    depends_on:
+      - backend
+    networks:
+      - devsuite_net
 
 volumes:
   postgres_data:
-  redis_data:
+
+networks:
+  devsuite_net:
+    driver: bridge

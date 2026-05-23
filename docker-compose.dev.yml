@@ -1,0 +1,41 @@
+version: '3.8'
+
+# Development Docker Compose
+# Usage: docker-compose -f docker-compose.dev.yml up -d
+# This spins up isolated database and caching layers for local development.
+# You can then run `npm run dev` in the frontend and backend directories natively
+# to preserve Vite's HMR and TypeScript's blazing fast compilation on macOS.
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: devsuite_db_dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-devsuite}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-devsuite}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: devsuite_redis_dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data_dev:
