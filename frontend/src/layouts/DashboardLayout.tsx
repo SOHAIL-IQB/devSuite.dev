@@ -13,7 +13,8 @@ import {
   Sun,
   Laptop,
   Lock,
-  Hash
+  Hash,
+  Regex
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -29,6 +30,7 @@ const NAV_ITEMS = [
   { name: 'Dashboard', path: '/', icon: <Terminal className="w-4 h-4" /> },
   { name: 'API Workspace', path: '/api', icon: <Code2 className="w-4 h-4" /> },
   { name: 'Formatters', path: '/format', icon: <Braces className="w-4 h-4" /> },
+  { name: 'Regex Tester', path: '/regex', icon: <Regex className="w-4 h-4" /> },
   { name: 'JWT Decoder', path: '/jwt', icon: <Lock className="w-4 h-4" /> },
   { name: 'Base64 Encoder', path: '/base64', icon: <Hash className="w-4 h-4" /> },
   { name: 'Notes', path: '/notes', icon: <BookText className="w-4 h-4" /> },

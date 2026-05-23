@@ -59,6 +59,41 @@ export function CommandPalette() {
           </CommandItem>
         </CommandGroup>
         <CommandSeparator />
+        <CommandGroup heading="Utilities & Formatters">
+          <CommandItem onSelect={() => runCommand(() => navigate('/regex'))}>
+            <Code2 className="mr-2 h-4 w-4" />
+            <span>Regex Tester</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => navigate('/format/code-formatter'))}>
+            <Code2 className="mr-2 h-4 w-4" />
+            <span>Code Formatter</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => navigate('/format/json-diff'))}>
+            <Braces className="mr-2 h-4 w-4" />
+            <span>JSON Diff Checker</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => navigate('/format/json-to-csv'))}>
+            <Braces className="mr-2 h-4 w-4" />
+            <span>JSON to CSV</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => navigate('/format/uuid-generator'))}>
+            <Braces className="mr-2 h-4 w-4" />
+            <span>UUID Generator</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => navigate('/format/hash-generator'))}>
+            <Braces className="mr-2 h-4 w-4" />
+            <span>Hash Generator</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => navigate('/jwt'))}>
+            <Braces className="mr-2 h-4 w-4" />
+            <span>JWT Decoder</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => navigate('/base64'))}>
+            <Braces className="mr-2 h-4 w-4" />
+            <span>Base64 Encoder / Decoder</span>
+          </CommandItem>
+        </CommandGroup>
+        <CommandSeparator />
         <CommandGroup heading="Theme">
           <CommandItem onSelect={() => runCommand(() => setTheme('light'))}>
             <Sun className="mr-2 h-4 w-4" />

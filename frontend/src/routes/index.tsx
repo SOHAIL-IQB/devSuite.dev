@@ -14,6 +14,7 @@ import { UuidGenerator } from '@/pages/formatters/UuidGenerator';
 import { HashGenerator } from '@/pages/formatters/HashGenerator';
 import { JwtDecoder } from '@/pages/formatters/JwtDecoder';
 import { Base64Encoder } from '@/pages/formatters/Base64Encoder';
+import { RegexTester } from '@/pages/formatters/RegexTester';
 import { NotesWorkspace } from '@/pages/notes/NotesWorkspace';
 import { SettingsWorkspace } from '@/pages/settings/SettingsWorkspace';
 import { Navigate } from 'react-router-dom';
@@ -62,6 +63,10 @@ export const router = createBrowserRouter([
           {
             path: 'base64',
             element: <Base64Encoder />,
+          },
+          {
+            path: 'regex',
+            element: <RegexTester />,
           }
         ],
       }
