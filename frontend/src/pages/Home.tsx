@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Code2, Braces, BookText, Activity, Lock, Hash, Regex } from 'lucide-react';
+import { Code2, Braces, BookText, Activity, Lock, Hash, Regex, Server } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { useNotesStore } from '@/store/notesStore';
@@ -49,11 +49,22 @@ export function Home() {
   const { user } = useAuthStore();
   const { notes } = useNotesStore();
   const [apiCount, setApiCount] = useState(0);
+  const [systemHealth, setSystemHealth] = useState<'checking' | 'online' | 'offline'>('checking');
+  const [env, setEnv] = useState('development');
 
   useEffect(() => {
     api.get('/workspaces/stats').then(res => {
       setApiCount(res.data.apiRequests || 0);
     }).catch(() => {});
+
+    api.get('/health').then(res => {
+      if (res.data.status === 'ok') {
+        setSystemHealth('online');
+        setEnv(res.data.environment || 'development');
+      }
+    }).catch(() => {
+      setSystemHealth('offline');
+    });
   }, []);
 
   return (
@@ -65,7 +76,7 @@ export function Home() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="bg-primary/5 border-primary/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center">
@@ -97,6 +108,37 @@ export function Home() {
           <CardContent>
             <div className="text-3xl font-bold">9</div>
             <p className="text-xs text-muted-foreground mt-1">Supported Languages</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-primary/5 border-primary/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center">
+              <Server className="w-4 h-4 mr-2" /> System Infrastructure
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-3">
+              <div className="text-3xl font-bold capitalize">{env}</div>
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="relative flex h-2.5 w-2.5">
+                {systemHealth === 'online' && (
+                  <>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                  </>
+                )}
+                {systemHealth === 'offline' && (
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                )}
+                {systemHealth === 'checking' && (
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-500"></span>
+                )}
+              </span>
+              <p className="text-xs text-muted-foreground">
+                {systemHealth === 'online' ? 'API & DB Connected' : systemHealth === 'checking' ? 'Checking connection...' : 'Disconnected'}
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>

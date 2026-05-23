@@ -28,8 +28,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/workspace', workspaceRoutes);
 
 // Health Check Route
-app.get('/health', (req: Request, res: Response) => {
-  res.json({ status: 'ok', message: 'DevWorkspace API is running' });
+app.get('/api/health', (req: Request, res: Response) => {
+  res.json({ status: 'ok', message: 'DevWorkspace API is running', environment: process.env.NODE_ENV || 'development' });
 });
 
 // Global Error Handler
