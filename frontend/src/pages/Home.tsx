@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Code2, Braces, BookText, Activity, Lock, Hash } from 'lucide-react';
+import { Code2, Braces, BookText, Activity, Lock, Hash, Regex } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { useNotesStore } from '@/store/notesStore';
@@ -36,6 +36,12 @@ const CARDS = [
     description: 'Quickly encode and decode Base64 strings.',
     icon: <Hash className="w-8 h-8 text-rose-500" />,
     path: '/base64'
+  },
+  {
+    title: 'Regex Tester',
+    description: 'Test regular expressions against target strings.',
+    icon: <Regex className="w-8 h-8 text-cyan-500" />,
+    path: '/regex'
   }
 ];
 
