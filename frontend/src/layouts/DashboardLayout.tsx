@@ -16,7 +16,9 @@ import {
   Hash,
   Regex,
   Clock,
-  CalendarClock
+  CalendarClock,
+  Link2,
+  Palette
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -35,6 +37,8 @@ const NAV_ITEMS = [
   { name: 'Regex Tester', path: '/regex', icon: <Regex className="w-4 h-4" /> },
   { name: 'JWT Decoder', path: '/jwt', icon: <Lock className="w-4 h-4" /> },
   { name: 'Base64 Encoder', path: '/base64', icon: <Hash className="w-4 h-4" /> },
+  { name: 'URL Parser', path: '/url', icon: <Link2 className="w-4 h-4" /> },
+  { name: 'Color Converter', path: '/color', icon: <Palette className="w-4 h-4" /> },
   { name: 'Epoch Converter', path: '/time', icon: <Clock className="w-4 h-4" /> },
   { name: 'Cron Parser', path: '/cron', icon: <CalendarClock className="w-4 h-4" /> },
   { name: 'Notes', path: '/notes', icon: <BookText className="w-4 h-4" /> },

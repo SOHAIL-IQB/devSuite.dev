@@ -17,6 +17,8 @@ import { Base64Encoder } from '@/pages/formatters/Base64Encoder';
 import { RegexTester } from '@/pages/formatters/RegexTester';
 import { EpochConverter } from '@/pages/formatters/EpochConverter';
 import { CronParser } from '@/pages/formatters/CronParser';
+import { UrlParser } from '@/pages/formatters/UrlParser';
+import { ColorConverter } from '@/pages/formatters/ColorConverter';
 import { NotesWorkspace } from '@/pages/notes/NotesWorkspace';
 import { SettingsWorkspace } from '@/pages/settings/SettingsWorkspace';
 import { Navigate } from 'react-router-dom';
@@ -77,6 +79,14 @@ export const router = createBrowserRouter([
           {
             path: 'cron',
             element: <CronParser />,
+          },
+          {
+            path: 'url',
+            element: <UrlParser />,
+          },
+          {
+            path: 'color',
+            element: <ColorConverter />,
           }
         ],
       }

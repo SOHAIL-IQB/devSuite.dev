@@ -10,7 +10,7 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from '@/components/ui/command';
-import { Terminal, Code2, Braces, BookText, Settings, Sun, Moon, Laptop, Clock, CalendarClock } from 'lucide-react';
+import { Terminal, Code2, Braces, BookText, Settings, Sun, Moon, Laptop, Clock, CalendarClock, Link2, Palette } from 'lucide-react';
 import { useThemeStore } from '@/store/themeStore';
 
 export function CommandPalette() {
@@ -99,6 +99,14 @@ export function CommandPalette() {
           <CommandItem onSelect={() => runCommand(() => navigate('/cron'))}>
             <CalendarClock className="mr-2 h-4 w-4" />
             <span>Cron Expression Parser</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => navigate('/url'))}>
+            <Link2 className="mr-2 h-4 w-4" />
+            <span>URL Parser & Builder</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => navigate('/color'))}>
+            <Palette className="mr-2 h-4 w-4" />
+            <span>Color Format Converter</span>
           </CommandItem>
         </CommandGroup>
         <CommandSeparator />
