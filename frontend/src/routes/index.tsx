@@ -19,6 +19,8 @@ import { EpochConverter } from '@/pages/formatters/EpochConverter';
 import { CronParser } from '@/pages/formatters/CronParser';
 import { UrlParser } from '@/pages/formatters/UrlParser';
 import { ColorConverter } from '@/pages/formatters/ColorConverter';
+import { MarkdownPreviewer } from '@/pages/formatters/MarkdownPreviewer';
+import { TextInspector } from '@/pages/formatters/TextInspector';
 import { NotesWorkspace } from '@/pages/notes/NotesWorkspace';
 import { SettingsWorkspace } from '@/pages/settings/SettingsWorkspace';
 import { Navigate } from 'react-router-dom';
@@ -87,6 +89,14 @@ export const router = createBrowserRouter([
           {
             path: 'color',
             element: <ColorConverter />,
+          },
+          {
+            path: 'markdown',
+            element: <MarkdownPreviewer />,
+          },
+          {
+            path: 'text',
+            element: <TextInspector />,
           }
         ],
       }

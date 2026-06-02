@@ -18,7 +18,9 @@ import {
   Clock,
   CalendarClock,
   Link2,
-  Palette
+  Palette,
+  FileCode2,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -39,6 +41,8 @@ const NAV_ITEMS = [
   { name: 'Base64 Encoder', path: '/base64', icon: <Hash className="w-4 h-4" /> },
   { name: 'URL Parser', path: '/url', icon: <Link2 className="w-4 h-4" /> },
   { name: 'Color Converter', path: '/color', icon: <Palette className="w-4 h-4" /> },
+  { name: 'Markdown Previewer', path: '/markdown', icon: <FileCode2 className="w-4 h-4" /> },
+  { name: 'Text Inspector', path: '/text', icon: <FileText className="w-4 h-4" /> },
   { name: 'Epoch Converter', path: '/time', icon: <Clock className="w-4 h-4" /> },
   { name: 'Cron Parser', path: '/cron', icon: <CalendarClock className="w-4 h-4" /> },
   { name: 'Notes', path: '/notes', icon: <BookText className="w-4 h-4" /> },

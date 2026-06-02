@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Code2, Braces, BookText, Activity, Lock, Hash, Regex, Server, Clock, CalendarClock, Link2, Palette } from 'lucide-react';
+import { Code2, Braces, BookText, Activity, Lock, Hash, Regex, Server, Clock, CalendarClock, Link2, Palette, FileCode2, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { useNotesStore } from '@/store/notesStore';
@@ -66,6 +66,18 @@ const CARDS = [
     description: 'Universal color format converter and palette generator.',
     icon: <Palette className="w-8 h-8 text-pink-500" />,
     path: '/color'
+  },
+  {
+    title: 'Markdown Previewer',
+    description: 'Write markdown and render mermaid diagrams instantly.',
+    icon: <FileCode2 className="w-8 h-8 text-emerald-500" />,
+    path: '/markdown'
+  },
+  {
+    title: 'Text Inspector',
+    description: 'Live text stats and omni-case string conversions.',
+    icon: <FileText className="w-8 h-8 text-orange-500" />,
+    path: '/text'
   }
 ];
 
@@ -130,7 +142,7 @@ export function Home() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">12</div>
+            <div className="text-3xl font-bold">14</div>
             <p className="text-xs text-muted-foreground mt-1">Premium Utilities</p>
           </CardContent>
         </Card>

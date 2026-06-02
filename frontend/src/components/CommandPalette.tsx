@@ -10,7 +10,7 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from '@/components/ui/command';
-import { Terminal, Code2, Braces, BookText, Settings, Sun, Moon, Laptop, Clock, CalendarClock, Link2, Palette } from 'lucide-react';
+import { Terminal, Code2, Braces, BookText, Settings, Sun, Moon, Laptop, Clock, CalendarClock, Link2, Palette, FileCode2, FileText } from 'lucide-react';
 import { useThemeStore } from '@/store/themeStore';
 
 export function CommandPalette() {
@@ -107,6 +107,14 @@ export function CommandPalette() {
           <CommandItem onSelect={() => runCommand(() => navigate('/color'))}>
             <Palette className="mr-2 h-4 w-4" />
             <span>Color Format Converter</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => navigate('/markdown'))}>
+            <FileCode2 className="mr-2 h-4 w-4" />
+            <span>Markdown Previewer</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => navigate('/text'))}>
+            <FileText className="mr-2 h-4 w-4" />
+            <span>Text Inspector</span>
           </CommandItem>
         </CommandGroup>
         <CommandSeparator />
