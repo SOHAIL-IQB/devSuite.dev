@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Code2, Braces, BookText, Activity, Lock, Hash, Regex, Server, Clock, CalendarClock, Link2, Palette, FileCode2, FileText, Radio } from 'lucide-react';
+import { Code2, Braces, BookText, Activity, Lock, Hash, Regex, Server, Clock, CalendarClock, Link2, Palette, FileCode2, FileText, Radio, Layers } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { useNotesStore } from '@/store/notesStore';
@@ -18,6 +18,12 @@ const CARDS = [
     description: 'Test full-duplex WebSocket connections and live event streams.',
     icon: <Radio className="w-8 h-8 text-emerald-500" />,
     path: '/websocket'
+  },
+  {
+    title: 'GraphQL Client',
+    description: 'Execute GraphQL queries, inspect variables, and explore schemas.',
+    icon: <Layers className="w-8 h-8 text-pink-500" />,
+    path: '/graphql'
   },
   {
     title: 'Code Formatter',

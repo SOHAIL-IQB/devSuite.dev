@@ -31,13 +31,27 @@ import {
   User, 
   SlidersHorizontal,
   Upload,
-  Download
+  Download,
+  Globe
 } from 'lucide-react';
 import { generateCurl, parseCurl } from '@/lib/curl.utils';
 import { parseOpenApi, parsePostmanCollection, exportToOpenApi } from '@/lib/openapi.utils';
+import { useEnvironmentStore } from '@/store/environmentStore';
 
 export function ApiWorkspace() {
   const { theme } = useThemeStore();
+  const { 
+    environments, 
+    activeEnvironmentId, 
+    setActiveEnvironmentId, 
+    resolveVariables, 
+    createEnvironment, 
+    addVariable, 
+    updateVariable, 
+    removeVariable, 
+    deleteEnvironment 
+  } = useEnvironmentStore();
+
   const { 
     activeRequest, 
     savedRequests,
@@ -68,6 +82,9 @@ export function ApiWorkspace() {
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [importTab, setImportTab] = useState<'curl' | 'openapi' | 'postman'>('curl');
   const [importInput, setImportInput] = useState('');
+  const [envModalOpen, setEnvModalOpen] = useState(false);
+  const [selectedEnvId, setSelectedEnvId] = useState<string>(activeEnvironmentId || environments[0]?.id || '');
+  const [newEnvName, setNewEnvName] = useState('');
 
   const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
@@ -112,32 +129,39 @@ export function ApiWorkspace() {
     setResponse(null);
 
     try {
-      // 1. Build Headers including Auth headers
+      // 1. Resolve URL
+      const resolvedUrl = resolveVariables(activeRequest.url);
+
+      // 2. Build and resolve Headers including Auth headers
       const headersObject: Record<string, string> = {};
 
       activeRequest.headers
         .filter(h => h.enabled && h.key.trim())
         .forEach(h => {
-          headersObject[h.key.trim()] = h.value;
+          headersObject[resolveVariables(h.key.trim())] = resolveVariables(h.value);
         });
 
       // Inject Auth into headers if configured
       if (activeRequest.auth) {
         if (activeRequest.auth.type === 'bearer' && activeRequest.auth.bearerToken.trim()) {
-          headersObject['Authorization'] = `Bearer ${activeRequest.auth.bearerToken.trim()}`;
+          headersObject['Authorization'] = `Bearer ${resolveVariables(activeRequest.auth.bearerToken.trim())}`;
         } else if (activeRequest.auth.type === 'basic' && (activeRequest.auth.basicUsername || activeRequest.auth.basicPassword)) {
-          const credentials = btoa(`${activeRequest.auth.basicUsername}:${activeRequest.auth.basicPassword}`);
+          const u = resolveVariables(activeRequest.auth.basicUsername);
+          const p = resolveVariables(activeRequest.auth.basicPassword);
+          const credentials = btoa(`${u}:${p}`);
           headersObject['Authorization'] = `Basic ${credentials}`;
         } else if (activeRequest.auth.type === 'apiKey' && activeRequest.auth.apiKeyAddTo === 'header' && activeRequest.auth.apiKeyName.trim()) {
-          headersObject[activeRequest.auth.apiKeyName.trim()] = activeRequest.auth.apiKeyValue;
+          headersObject[resolveVariables(activeRequest.auth.apiKeyName.trim())] = resolveVariables(activeRequest.auth.apiKeyValue);
         }
       }
 
+      const resolvedBody = activeRequest.body ? resolveVariables(activeRequest.body) : undefined;
+
       const res = await api.post('/workspace/proxy', {
-        url: activeRequest.url,
+        url: resolvedUrl,
         method: activeRequest.method,
         headers: Object.keys(headersObject).length > 0 ? headersObject : undefined,
-        body: ['POST', 'PUT', 'PATCH', 'DELETE'].includes(activeRequest.method) ? (activeRequest.body || undefined) : undefined,
+        body: ['POST', 'PUT', 'PATCH', 'DELETE'].includes(activeRequest.method) ? resolvedBody : undefined,
       });
 
       setResponse(res.data);
@@ -190,7 +214,17 @@ export function ApiWorkspace() {
   };
 
   const handleCopyCurl = () => {
-    const curl = generateCurl(activeRequest);
+    const resolvedReq = {
+      ...activeRequest,
+      url: resolveVariables(activeRequest.url),
+      headers: activeRequest.headers.map(h => ({
+        ...h,
+        key: resolveVariables(h.key),
+        value: resolveVariables(h.value),
+      })),
+      body: activeRequest.body ? resolveVariables(activeRequest.body) : '',
+    };
+    const curl = generateCurl(resolvedReq);
     navigator.clipboard.writeText(curl);
     toast.success('cURL command copied to clipboard');
   };
@@ -406,6 +440,46 @@ export function ApiWorkspace() {
               </Button>
             </div>
             
+            {/* ENVIRONMENT SELECTOR */}
+            <div className="hidden md:flex items-center gap-1 bg-muted/20 border rounded-lg h-11 px-2">
+              <Globe className="w-3.5 h-3.5 text-muted-foreground" />
+              <Select
+                value={activeEnvironmentId || 'none'}
+                onValueChange={(val) => {
+                  if (val === 'manage') {
+                    setEnvModalOpen(true);
+                  } else {
+                    setActiveEnvironmentId(val === 'none' ? null : val);
+                  }
+                }}
+              >
+                <SelectTrigger className="w-[140px] border-0 bg-transparent shadow-none focus:ring-0 text-xs h-8">
+                  <SelectValue placeholder="Environment" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none" className="text-xs text-muted-foreground">No Environment</SelectItem>
+                  {environments.map((env) => (
+                    <SelectItem key={env.id} value={env.id} className="text-xs font-medium">
+                      {env.name}
+                    </SelectItem>
+                  ))}
+                  <div className="p-1 border-t mt-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start text-xs h-7 px-2 font-normal"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEnvModalOpen(true);
+                      }}
+                    >
+                      <SlidersHorizontal className="w-3.5 h-3.5 mr-2" /> Manage Environments
+                    </Button>
+                  </div>
+                </SelectContent>
+              </Select>
+            </div>
+
             <Button 
               variant="outline" 
               size="icon" 
@@ -848,6 +922,149 @@ export function ApiWorkspace() {
             <Button onClick={handleExecuteImport} disabled={!importInput.trim()}>
               Import {importTab === 'curl' ? 'cURL' : importTab === 'openapi' ? 'OpenAPI' : 'Postman'}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ENVIRONMENT MANAGEMENT MODAL */}
+      <Dialog open={envModalOpen} onOpenChange={setEnvModalOpen}>
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Globe className="w-4 h-4 text-primary" /> Manage Environments & Variables
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="flex-1 flex flex-col gap-4 py-2 min-h-0">
+            {/* ENVIRONMENT TABS & CREATE */}
+            <div className="flex items-center justify-between gap-2 border-b pb-2">
+              <div className="flex items-center gap-1.5 overflow-x-auto mac-scrollbar">
+                {environments.map((env) => (
+                  <Button
+                    key={env.id}
+                    variant={selectedEnvId === env.id ? 'default' : 'outline'}
+                    size="sm"
+                    className="text-xs h-7 px-3 shrink-0"
+                    onClick={() => setSelectedEnvId(env.id)}
+                  >
+                    {env.name}
+                  </Button>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-1 shrink-0">
+                <Input
+                  placeholder="New Environment..."
+                  value={newEnvName}
+                  onChange={(e) => setNewEnvName(e.target.value)}
+                  className="h-7 text-xs w-32"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && newEnvName.trim()) {
+                      const newId = createEnvironment(newEnvName);
+                      setSelectedEnvId(newId);
+                      setNewEnvName('');
+                      toast.success('Created new environment');
+                    }
+                  }}
+                />
+                <Button
+                  size="sm"
+                  className="h-7 text-xs px-2"
+                  disabled={!newEnvName.trim()}
+                  onClick={() => {
+                    const newId = createEnvironment(newEnvName);
+                    setSelectedEnvId(newId);
+                    setNewEnvName('');
+                    toast.success('Created new environment');
+                  }}
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            </div>
+
+            {/* SELECTED ENVIRONMENT VARIABLES TABLE */}
+            {(() => {
+              const currentEnv = environments.find((e) => e.id === selectedEnvId);
+              if (!currentEnv) return <p className="text-xs text-muted-foreground">Select or create an environment above.</p>;
+
+              return (
+                <div className="flex-1 flex flex-col min-h-0 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground">
+                      Define variables to use in URLs, headers, auth, or payloads like <code className="text-primary font-mono font-bold">&#123;&#123;variableName&#125;&#125;</code>.
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => addVariable(currentEnv.id)}
+                        className="h-7 text-xs"
+                      >
+                        <Plus className="w-3.5 h-3.5 mr-1" /> Add Variable
+                      </Button>
+                      {environments.length > 1 && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            if (window.confirm(`Delete environment "${currentEnv.name}"?`)) {
+                              deleteEnvironment(currentEnv.id);
+                              setSelectedEnvId(environments.filter(e => e.id !== currentEnv.id)[0]?.id || '');
+                              toast.success('Environment deleted');
+                            }
+                          }}
+                          className="h-7 text-xs text-red-500 hover:text-red-600 hover:bg-red-500/10"
+                        >
+                          <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete Env
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto space-y-2 border rounded-lg p-3 bg-muted/10 mac-scrollbar max-h-64">
+                    {currentEnv.variables.length === 0 ? (
+                      <p className="text-center text-xs text-muted-foreground py-6">No variables defined. Click &quot;Add Variable&quot; to begin.</p>
+                    ) : (
+                      currentEnv.variables.map((v) => (
+                        <div key={v.id} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            checked={v.enabled}
+                            onChange={(e) => updateVariable(currentEnv.id, v.id, { enabled: e.target.checked })}
+                            className="rounded border-muted-foreground/30 text-primary h-4 w-4"
+                          />
+                          <Input
+                            placeholder="Variable (e.g. baseUrl)"
+                            value={v.key}
+                            onChange={(e) => updateVariable(currentEnv.id, v.id, { key: e.target.value })}
+                            className="h-8 font-mono text-xs flex-1"
+                          />
+                          <Input
+                            placeholder="Value (e.g. https://api.io)"
+                            value={v.value}
+                            onChange={(e) => updateVariable(currentEnv.id, v.id, { value: e.target.value })}
+                            className="h-8 font-mono text-xs flex-1"
+                          />
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-muted-foreground hover:text-red-500"
+                            onClick={() => removeVariable(currentEnv.id, v.id)}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+
+          <DialogFooter>
+            <Button onClick={() => setEnvModalOpen(false)}>Done</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -5,6 +5,7 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { Home } from '@/pages/Home';
 import { ApiWorkspace } from '@/pages/workspace/ApiWorkspace';
 import { WebSocketWorkspace } from '@/pages/workspace/WebSocketWorkspace';
+import { GraphQLWorkspace } from '@/pages/workspace/GraphQLWorkspace';
 import { Login } from '@/pages/auth/Login';
 import { Register } from '@/pages/auth/Register';
 import { FormattersWorkspace } from '@/pages/formatters/FormattersWorkspace';
@@ -46,6 +47,10 @@ export const router = createBrowserRouter([
           {
             path: 'websocket',
             element: <WebSocketWorkspace />,
+          },
+          {
+            path: 'graphql',
+            element: <GraphQLWorkspace />,
           },
           {
             path: 'format',
