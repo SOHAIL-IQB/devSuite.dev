@@ -1,12 +1,10 @@
+import 'dotenv/config';
 import express, { Express, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth.routes';
 import workspaceRoutes from './routes/workspace.routes';
-
-dotenv.config();
 
 const app: Express = express();
 const port = process.env.PORT || 3000;
