@@ -65,6 +65,10 @@ export function CommandPalette() {
             <Database className="mr-2 h-4 w-4" />
             <span>SQL Studio & ER Playground</span>
           </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => navigate('/curl'))}>
+            <Terminal className="mr-2 h-4 w-4" />
+            <span>cURL Converter & HTTP Reference</span>
+          </CommandItem>
           <CommandItem onSelect={() => runCommand(() => navigate('/format'))}>
             <Braces className="mr-2 h-4 w-4" />
             <span>Formatters</span>

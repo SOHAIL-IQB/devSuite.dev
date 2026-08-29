@@ -38,6 +38,12 @@ const CARDS = [
     path: '/sql'
   },
   {
+    title: 'cURL Converter',
+    description: 'Convert cURL commands to JavaScript, Python, Go, and Rust.',
+    icon: <Code2 className="w-8 h-8 text-amber-500" />,
+    path: '/curl'
+  },
+  {
     title: 'Code Formatter',
     description: 'Format JSON, XML, Markdown, and validate payloads.',
     icon: <Braces className="w-8 h-8 text-green-500" />,

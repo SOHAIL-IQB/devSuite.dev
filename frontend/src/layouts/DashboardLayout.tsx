@@ -43,6 +43,7 @@ const NAV_ITEMS = [
   { name: 'GraphQL Client', path: '/graphql', icon: <Layers className="w-4 h-4" /> },
   { name: 'Webhook Bin', path: '/webhook-bin', icon: <Webhook className="w-4 h-4" /> },
   { name: 'SQL Studio', path: '/sql', icon: <Database className="w-4 h-4" /> },
+  { name: 'cURL Converter', path: '/curl', icon: <Terminal className="w-4 h-4" /> },
   { name: 'Formatters', path: '/format', icon: <Braces className="w-4 h-4" /> },
   { name: 'Regex Tester', path: '/regex', icon: <Regex className="w-4 h-4" /> },
   { name: 'JWT Decoder', path: '/jwt', icon: <Lock className="w-4 h-4" /> },
