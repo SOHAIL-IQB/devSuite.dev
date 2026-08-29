@@ -44,7 +44,16 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const passwordHash = await bcrypt.hash(password, 12);
     
     const user = await prisma.user.create({
-      data: { name, email, passwordHash },
+      data: { 
+        name, 
+        email, 
+        passwordHash,
+        workspaces: {
+          create: {
+            name: 'My Default Workspace',
+          },
+        },
+      },
     });
 
     const session = await prisma.session.create({

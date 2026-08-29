@@ -6,7 +6,7 @@ import { Plus, Trash2, Edit2, FileText, Search, Maximize2, Minimize2 } from 'luc
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ResizablePanel, ResizablePanelGroup, ResizableHandle } from '@/components/ui/resizable';
-import Editor, { useMonaco } from '@monaco-editor/react';
+import Editor from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -23,7 +23,6 @@ export function NotesWorkspace() {
   const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
 
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
-  const monaco = useMonaco();
 
   const activeNote = notes.find((n) => n.id === activeNoteId);
 
@@ -35,9 +34,9 @@ export function NotesWorkspace() {
         editorRef.current.setValue(activeNote.content);
       }
     }
-  }, [activeNoteId]);
+  }, [activeNoteId, activeNote]);
 
-  const handleEditorWillMount = (monacoInstance: typeof monaco) => {
+  const handleEditorWillMount = (monacoInstance: any) => {
     if (!monacoInstance) return;
     monacoInstance.editor.defineTheme('devworkspace-dark', {
       base: 'vs-dark',

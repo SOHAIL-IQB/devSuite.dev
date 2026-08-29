@@ -34,13 +34,7 @@ export function UuidGenerator() {
 
     const results = [];
     for (let i = 0; i < qty; i++) {
-      let uuid = '';
-      if (version === 'v4') {
-        uuid = generateUuidV4();
-      } else {
-        // Fallback or mock for others, v4 is only native one
-        uuid = generateUuidV4();
-      }
+      let uuid = generateUuidV4();
 
       if (hyphens === 'false') {
         uuid = uuid.replace(/-/g, '');

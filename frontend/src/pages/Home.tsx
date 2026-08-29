@@ -89,7 +89,7 @@ export function Home() {
   const [env, setEnv] = useState('development');
 
   useEffect(() => {
-    api.get('/workspaces/stats').then(res => {
+    api.get('/workspace/stats').then(res => {
       setApiCount(res.data.apiRequests || 0);
     }).catch(() => {});
 

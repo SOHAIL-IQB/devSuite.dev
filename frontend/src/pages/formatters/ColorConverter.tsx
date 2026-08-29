@@ -26,11 +26,6 @@ export function ColorConverter() {
   const [analogous1, setAnalogous1] = useState('');
   const [analogous2, setAnalogous2] = useState('');
 
-  // Update logic
-  useEffect(() => {
-    updateFromColor(inputColor);
-  }, [inputColor]);
-
   const updateFromColor = (val: string) => {
     const c = colord(val);
     if (c.isValid()) {
@@ -50,6 +45,11 @@ export function ColorConverter() {
       setIsValid(false);
     }
   };
+
+  // Update logic
+  useEffect(() => {
+    updateFromColor(inputColor);
+  }, [inputColor]);
 
   const handleCopy = (text: string, label: string) => {
     if (!text) return;

@@ -23,6 +23,16 @@ export function UrlParser() {
   const [hash, setHash] = useState('');
   const [queryParams, setQueryParams] = useState<QueryParam[]>([]);
 
+  const resetComponents = () => {
+    setProtocol('');
+    setHost('');
+    setPort('');
+    setPath('');
+    setHash('');
+    setQueryParams([]);
+    setError('');
+  };
+
   // Parse logic
   useEffect(() => {
     try {
@@ -45,20 +55,10 @@ export function UrlParser() {
       });
       setQueryParams(params);
       setError('');
-    } catch (e: any) {
+    } catch {
       setError('Invalid URL format');
     }
   }, [url]);
-
-  const resetComponents = () => {
-    setProtocol('');
-    setHost('');
-    setPort('');
-    setPath('');
-    setHash('');
-    setQueryParams([]);
-    setError('');
-  };
 
   const handleCopy = (text: string, label: string) => {
     if (!text) return;
@@ -85,7 +85,7 @@ export function UrlParser() {
   const encodeParams = () => {
     try {
       const parsedUrl = new URL(url.includes('://') ? url : `http://${url}`);
-      let newParams = new URLSearchParams();
+      const newParams = new URLSearchParams();
       queryParams.forEach(p => newParams.append(encodeURIComponent(p.key), encodeURIComponent(p.value)));
       parsedUrl.search = newParams.toString();
       setUrl(parsedUrl.toString());
@@ -95,7 +95,7 @@ export function UrlParser() {
   const decodeParams = () => {
     try {
       const parsedUrl = new URL(url.includes('://') ? url : `http://${url}`);
-      let newParams = new URLSearchParams();
+      const newParams = new URLSearchParams();
       queryParams.forEach(p => newParams.append(decodeURIComponent(p.key), decodeURIComponent(p.value)));
       parsedUrl.search = newParams.toString();
       setUrl(parsedUrl.toString());

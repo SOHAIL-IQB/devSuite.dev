@@ -30,10 +30,16 @@ export function SettingsWorkspace() {
       const res = await api.put('/auth/profile', { name, email });
       setUser(res.data.user);
       toast.success('Profile updated successfully');
-    } catch (err: any) {
-      const errorMsg = Array.isArray(err.response?.data?.error) 
-        ? err.response.data.error[0].message 
-        : (err.response?.data?.error || 'Failed to update profile');
+    } catch (err: unknown) {
+      let errorMsg = 'Failed to update profile';
+      if (err && typeof err === 'object' && 'response' in err) {
+        const responseData = (err as { response?: { data?: { error?: string | { message: string }[] } } }).response?.data;
+        if (Array.isArray(responseData?.error)) {
+          errorMsg = responseData.error[0].message;
+        } else if (typeof responseData?.error === 'string') {
+          errorMsg = responseData.error;
+        }
+      }
       toast.error(errorMsg);
     } finally {
       setIsSaving(false);
@@ -48,10 +54,16 @@ export function SettingsWorkspace() {
       toast.success('Password updated successfully');
       setCurrentPassword('');
       setNewPassword('');
-    } catch (err: any) {
-      const errorMsg = Array.isArray(err.response?.data?.error) 
-        ? err.response.data.error[0].message 
-        : (err.response?.data?.error || 'Failed to update password');
+    } catch (err: unknown) {
+      let errorMsg = 'Failed to update password';
+      if (err && typeof err === 'object' && 'response' in err) {
+        const responseData = (err as { response?: { data?: { error?: string | { message: string }[] } } }).response?.data;
+        if (Array.isArray(responseData?.error)) {
+          errorMsg = responseData.error[0].message;
+        } else if (typeof responseData?.error === 'string') {
+          errorMsg = responseData.error;
+        }
+      }
       toast.error(errorMsg);
     } finally {
       setIsSaving(false);
@@ -66,13 +78,22 @@ export function SettingsWorkspace() {
       await api.delete('/auth/account');
       toast.success('Account deleted');
       logout();
-    } catch (err: any) {
-      toast.error(err.response?.data?.error || 'Failed to delete account');
+    } catch (err: unknown) {
+      let errorMsg = 'Failed to delete account';
+      if (err && typeof err === 'object' && 'response' in err) {
+        const responseData = (err as { response?: { data?: { error?: string } } }).response?.data;
+        if (typeof responseData?.error === 'string') {
+          errorMsg = responseData.error;
+        }
+      }
+      toast.error(errorMsg);
       setIsSaving(false);
     }
   };
 
-  const tabs = [
+  type TabId = 'profile' | 'appearance' | 'account';
+
+  const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
     { id: 'profile', label: 'Profile Settings', icon: <User className="w-4 h-4 mr-2" /> },
     { id: 'appearance', label: 'Appearance', icon: <Monitor className="w-4 h-4 mr-2" /> },
     { id: 'account', label: 'Account Security', icon: <ShieldAlert className="w-4 h-4 mr-2" /> },
@@ -88,7 +109,7 @@ export function SettingsWorkspace() {
             key={tab.id}
             variant={activeTab === tab.id ? 'secondary' : 'ghost'}
             className={`w-full justify-start h-9 ${activeTab === tab.id ? 'bg-primary/10 text-primary hover:bg-primary/15' : 'text-muted-foreground'}`}
-            onClick={() => setActiveTab(tab.id as any)}
+            onClick={() => setActiveTab(tab.id)}
           >
             {tab.icon} {tab.label}
           </Button>

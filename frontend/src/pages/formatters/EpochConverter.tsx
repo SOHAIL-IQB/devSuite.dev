@@ -19,18 +19,25 @@ const COMMON_TIMEZONES = [
 ];
 
 export function EpochConverter() {
-  const [currentUnix, setCurrentUnix] = useState(Math.floor(Date.now() / 1000));
-  const [timezone, setTimezone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  const [currentUnix, setCurrentUnix] = useState(() => Math.floor(Date.now() / 1000));
+  const [timezone, setTimezone] = useState(() => Intl.DateTimeFormat().resolvedOptions().timeZone);
   
   const [naturalInput, setNaturalInput] = useState('');
-  const [seconds, setSeconds] = useState(currentUnix.toString());
-  const [milliseconds, setMilliseconds] = useState((currentUnix * 1000).toString());
-  const [isoString, setIsoString] = useState(new Date().toISOString());
+  const [seconds, setSeconds] = useState(() => Math.floor(Date.now() / 1000).toString());
+  const [milliseconds, setMilliseconds] = useState(() => (Math.floor(Date.now() / 1000) * 1000).toString());
+  const [isoString, setIsoString] = useState(() => new Date().toISOString());
   
-  const [dateObj, setDateObj] = useState<Date>(new Date());
+  const [dateObj, setDateObj] = useState<Date>(() => new Date());
   
-  // History
-  const [history, setHistory] = useState<number[]>([]);
+  // History with lazy initialization from localStorage
+  const [history, setHistory] = useState<number[]>(() => {
+    try {
+      const saved = localStorage.getItem('devsuite_epoch_history');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
 
   // Ticking clock
   useEffect(() => {
@@ -38,14 +45,6 @@ export function EpochConverter() {
       setCurrentUnix(Math.floor(Date.now() / 1000));
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
-
-  // Load history
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('devsuite_epoch_history');
-      if (saved) setHistory(JSON.parse(saved));
-    } catch(e) {}
   }, []);
 
   const saveToHistory = (unixSecs: number) => {

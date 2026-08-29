@@ -59,7 +59,8 @@ self.onmessage = (e: MessageEvent<RegexWorkerMessage>) => {
       const replacedText = targetText.replace(re, replacementStr || '');
       self.postMessage({ id, replacedText });
     }
-  } catch (err: any) {
-    self.postMessage({ id, error: err.message });
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : 'Invalid regex operation';
+    self.postMessage({ id, error: errorMsg });
   }
 };
