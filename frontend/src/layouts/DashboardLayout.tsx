@@ -22,7 +22,8 @@ import {
   FileCode2,
   FileText,
   Radio,
-  Layers
+  Layers,
+  Webhook
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -39,6 +40,7 @@ const NAV_ITEMS = [
   { name: 'API Workspace', path: '/api', icon: <Code2 className="w-4 h-4" /> },
   { name: 'WebSocket Client', path: '/websocket', icon: <Radio className="w-4 h-4" /> },
   { name: 'GraphQL Client', path: '/graphql', icon: <Layers className="w-4 h-4" /> },
+  { name: 'Webhook Bin', path: '/webhook-bin', icon: <Webhook className="w-4 h-4" /> },
   { name: 'Formatters', path: '/format', icon: <Braces className="w-4 h-4" /> },
   { name: 'Regex Tester', path: '/regex', icon: <Regex className="w-4 h-4" /> },
   { name: 'JWT Decoder', path: '/jwt', icon: <Lock className="w-4 h-4" /> },

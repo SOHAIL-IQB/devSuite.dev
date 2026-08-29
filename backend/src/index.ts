@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth.routes';
 import workspaceRoutes from './routes/workspace.routes';
+import webhookBinRoutes from './routes/webhookBin.routes';
 
 const app: Express = express();
 const port = process.env.PORT || 3000;
@@ -24,6 +25,7 @@ app.use(cookieParser());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/workspace', workspaceRoutes);
+app.use('/api/bin', webhookBinRoutes);
 
 // Health Check Route
 app.get('/api/health', (req: Request, res: Response) => {

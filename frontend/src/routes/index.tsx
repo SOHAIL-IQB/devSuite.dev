@@ -6,6 +6,7 @@ import { Home } from '@/pages/Home';
 import { ApiWorkspace } from '@/pages/workspace/ApiWorkspace';
 import { WebSocketWorkspace } from '@/pages/workspace/WebSocketWorkspace';
 import { GraphQLWorkspace } from '@/pages/workspace/GraphQLWorkspace';
+import { WebhookBinWorkspace } from '@/pages/workspace/WebhookBinWorkspace';
 import { Login } from '@/pages/auth/Login';
 import { Register } from '@/pages/auth/Register';
 import { FormattersWorkspace } from '@/pages/formatters/FormattersWorkspace';
@@ -51,6 +52,10 @@ export const router = createBrowserRouter([
           {
             path: 'graphql',
             element: <GraphQLWorkspace />,
+          },
+          {
+            path: 'webhook-bin',
+            element: <WebhookBinWorkspace />,
           },
           {
             path: 'format',

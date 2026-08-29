@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
-    "test": "ts-node -T tests/security_and_auth.test.ts && ts-node -T tests/authorization_and_ownership.test.ts"
+    "test": "ts-node -T tests/security_and_auth.test.ts && ts-node -T tests/authorization_and_ownership.test.ts && ts-node -T tests/webhook_bin.test.ts"
   },
   "keywords": [],
   "author": "",
