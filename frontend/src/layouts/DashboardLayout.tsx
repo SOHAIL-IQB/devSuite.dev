@@ -28,7 +28,8 @@ import {
   Server,
   Globe2,
   Container,
-  GitPullRequest
+  GitPullRequest,
+  GitBranch
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -51,6 +52,7 @@ const NAV_ITEMS = [
   { name: 'cURL Converter', path: '/curl', icon: <Terminal className="w-4 h-4" /> },
   { name: 'Docker Studio', path: '/docker', icon: <Container className="w-4 h-4" /> },
   { name: 'CI/CD Studio', path: '/cicd', icon: <GitPullRequest className="w-4 h-4" /> },
+  { name: 'Git Studio', path: '/git-tools', icon: <GitBranch className="w-4 h-4" /> },
   { name: 'Network Tools', path: '/network-tools', icon: <Globe2 className="w-4 h-4" /> },
   { name: 'Formatters', path: '/format', icon: <Braces className="w-4 h-4" /> },
   { name: 'Regex Tester', path: '/regex', icon: <Regex className="w-4 h-4" /> },

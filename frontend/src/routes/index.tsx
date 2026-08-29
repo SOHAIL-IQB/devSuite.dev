@@ -13,6 +13,7 @@ import { MockServerWorkspace } from '@/pages/workspace/MockServerWorkspace';
 import { NetworkDiagnosticsWorkspace } from '@/pages/workspace/NetworkDiagnosticsWorkspace';
 import { DockerStudioWorkspace } from '@/pages/workspace/DockerStudioWorkspace';
 import { CicdStudioWorkspace } from '@/pages/workspace/CicdStudioWorkspace';
+import { GitStudioWorkspace } from '@/pages/workspace/GitStudioWorkspace';
 import { Login } from '@/pages/auth/Login';
 import { Register } from '@/pages/auth/Register';
 import { FormattersWorkspace } from '@/pages/formatters/FormattersWorkspace';
@@ -86,6 +87,10 @@ export const router = createBrowserRouter([
           {
             path: 'cicd',
             element: <CicdStudioWorkspace />,
+          },
+          {
+            path: 'git-tools',
+            element: <GitStudioWorkspace />,
           },
           {
             path: 'format',

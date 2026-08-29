@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Code2, Braces, BookText, Activity, Lock, Hash, Regex, Server, Clock, CalendarClock, Link2, Palette, FileCode2, FileText, Radio, Layers, Webhook, Database, Globe2, Container, GitPullRequest } from 'lucide-react';
+import { Code2, Braces, BookText, Activity, Lock, Hash, Regex, Server, Clock, CalendarClock, Link2, Palette, FileCode2, FileText, Radio, Layers, Webhook, Database, Globe2, Container, GitPullRequest, GitBranch } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { useNotesStore } from '@/store/notesStore';
@@ -66,6 +66,12 @@ const CARDS = [
     description: 'Design automated pipelines for GitHub Actions and GitLab CI with security scans.',
     icon: <GitPullRequest className="w-8 h-8 text-orange-600" />,
     path: '/cicd'
+  },
+  {
+    title: 'Git Studio',
+    description: 'Build Conventional Commits, resolve tricky Git undo scenarios, and parse logs.',
+    icon: <GitBranch className="w-8 h-8 text-red-500" />,
+    path: '/git-tools'
   },
   {
     title: 'Code Formatter',

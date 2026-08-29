@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "test": "node --experimental-strip-types src/lib/__tests__/utilities_and_workspace.test.ts && node --experimental-strip-types src/lib/__tests__/openapi_and_postman.test.ts && node --experimental-strip-types src/lib/__tests__/websocket_and_features.test.ts && node --experimental-strip-types src/lib/__tests__/graphql_and_env.test.ts && node --experimental-strip-types src/lib/__tests__/sql_parser.test.ts && node --experimental-strip-types src/lib/__tests__/curl_converter.test.ts && node --experimental-strip-types src/lib/__tests__/schema_converter.test.ts && node --experimental-strip-types src/lib/__tests__/container_generator.test.ts && node --experimental-strip-types src/lib/__tests__/cicd_generator.test.ts",
+    "test": "node --experimental-strip-types src/lib/__tests__/utilities_and_workspace.test.ts && node --experimental-strip-types src/lib/__tests__/openapi_and_postman.test.ts && node --experimental-strip-types src/lib/__tests__/websocket_and_features.test.ts && node --experimental-strip-types src/lib/__tests__/graphql_and_env.test.ts && node --experimental-strip-types src/lib/__tests__/sql_parser.test.ts && node --experimental-strip-types src/lib/__tests__/curl_converter.test.ts && node --experimental-strip-types src/lib/__tests__/schema_converter.test.ts && node --experimental-strip-types src/lib/__tests__/container_generator.test.ts && node --experimental-strip-types src/lib/__tests__/cicd_generator.test.ts && node --experimental-strip-types src/lib/__tests__/git_tools.test.ts",
     "preview": "vite preview"
   },
   "dependencies": {

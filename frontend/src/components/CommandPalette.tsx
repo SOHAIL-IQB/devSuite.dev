@@ -10,7 +10,7 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from '@/components/ui/command';
-import { Terminal, Code2, Radio, Layers, Webhook, Database, Server, Globe2, Container, GitPullRequest, Braces, BookText, Settings, Sun, Moon, Laptop, Clock, CalendarClock, Link2, Palette, FileCode2, FileText } from 'lucide-react';
+import { Terminal, Code2, Radio, Layers, Webhook, Database, Server, Globe2, Container, GitPullRequest, GitBranch, Braces, BookText, Settings, Sun, Moon, Laptop, Clock, CalendarClock, Link2, Palette, FileCode2, FileText } from 'lucide-react';
 import { useThemeStore } from '@/store/themeStore';
 
 export function CommandPalette() {
@@ -84,6 +84,10 @@ export function CommandPalette() {
           <CommandItem onSelect={() => runCommand(() => navigate('/cicd'))}>
             <GitPullRequest className="mr-2 h-4 w-4" />
             <span>CI/CD Pipeline & Workflow Architect</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => navigate('/git-tools'))}>
+            <GitBranch className="mr-2 h-4 w-4" />
+            <span>Git Studio & Command Navigator</span>
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => navigate('/format'))}>
             <Braces className="mr-2 h-4 w-4" />
