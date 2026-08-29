@@ -17,6 +17,6 @@ router.delete('/:binId/requests', clearBinRequests);
 
 // Webhook Catcher Routes
 router.all('/catch/:binId', handleIncomingWebhook);
-router.all('/catch/:binId/*', handleIncomingWebhook);
+router.all('/catch/:binId/{*subpath}', handleIncomingWebhook);
 
 export default router;
