@@ -10,7 +10,7 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from '@/components/ui/command';
-import { Terminal, Code2, Radio, Layers, Webhook, Database, Server, Globe2, Braces, BookText, Settings, Sun, Moon, Laptop, Clock, CalendarClock, Link2, Palette, FileCode2, FileText } from 'lucide-react';
+import { Terminal, Code2, Radio, Layers, Webhook, Database, Server, Globe2, Container, Braces, BookText, Settings, Sun, Moon, Laptop, Clock, CalendarClock, Link2, Palette, FileCode2, FileText } from 'lucide-react';
 import { useThemeStore } from '@/store/themeStore';
 
 export function CommandPalette() {
@@ -76,6 +76,10 @@ export function CommandPalette() {
           <CommandItem onSelect={() => runCommand(() => navigate('/network-tools'))}>
             <Globe2 className="mr-2 h-4 w-4" />
             <span>DNS & SSL Network Diagnostics</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => navigate('/docker'))}>
+            <Container className="mr-2 h-4 w-4" />
+            <span>Docker & Container Architecture Studio</span>
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => navigate('/format'))}>
             <Braces className="mr-2 h-4 w-4" />

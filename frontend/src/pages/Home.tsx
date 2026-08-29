@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Code2, Braces, BookText, Activity, Lock, Hash, Regex, Server, Clock, CalendarClock, Link2, Palette, FileCode2, FileText, Radio, Layers, Webhook, Database, Globe2 } from 'lucide-react';
+import { Code2, Braces, BookText, Activity, Lock, Hash, Regex, Server, Clock, CalendarClock, Link2, Palette, FileCode2, FileText, Radio, Layers, Webhook, Database, Globe2, Container } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { useNotesStore } from '@/store/notesStore';
@@ -54,6 +54,12 @@ const CARDS = [
     description: 'Authoritative DNS lookups and live SSL/TLS certificate inspector.',
     icon: <Globe2 className="w-8 h-8 text-sky-500" />,
     path: '/network-tools'
+  },
+  {
+    title: 'Docker Studio',
+    description: 'Generate production Dockerfiles, Compose stacks, and Kubernetes manifests.',
+    icon: <Container className="w-8 h-8 text-blue-600" />,
+    path: '/docker'
   },
   {
     title: 'Code Formatter',

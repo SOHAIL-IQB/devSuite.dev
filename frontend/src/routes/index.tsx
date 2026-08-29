@@ -11,6 +11,7 @@ import { SqlStudioWorkspace } from '@/pages/workspace/SqlStudioWorkspace';
 import { CurlConverterWorkspace } from '@/pages/workspace/CurlConverterWorkspace';
 import { MockServerWorkspace } from '@/pages/workspace/MockServerWorkspace';
 import { NetworkDiagnosticsWorkspace } from '@/pages/workspace/NetworkDiagnosticsWorkspace';
+import { DockerStudioWorkspace } from '@/pages/workspace/DockerStudioWorkspace';
 import { Login } from '@/pages/auth/Login';
 import { Register } from '@/pages/auth/Register';
 import { FormattersWorkspace } from '@/pages/formatters/FormattersWorkspace';
@@ -76,6 +77,10 @@ export const router = createBrowserRouter([
           {
             path: 'network-tools',
             element: <NetworkDiagnosticsWorkspace />,
+          },
+          {
+            path: 'docker',
+            element: <DockerStudioWorkspace />,
           },
           {
             path: 'format',
