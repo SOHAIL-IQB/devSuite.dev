@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "test": "node --experimental-strip-types src/lib/__tests__/utilities_and_workspace.test.ts && node --experimental-strip-types src/lib/__tests__/openapi_and_postman.test.ts",
+    "test": "node --experimental-strip-types src/lib/__tests__/utilities_and_workspace.test.ts && node --experimental-strip-types src/lib/__tests__/openapi_and_postman.test.ts && node --experimental-strip-types src/lib/__tests__/websocket_and_features.test.ts",
     "preview": "vite preview"
   },
   "dependencies": {
