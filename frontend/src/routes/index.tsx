@@ -7,6 +7,7 @@ import { ApiWorkspace } from '@/pages/workspace/ApiWorkspace';
 import { WebSocketWorkspace } from '@/pages/workspace/WebSocketWorkspace';
 import { GraphQLWorkspace } from '@/pages/workspace/GraphQLWorkspace';
 import { WebhookBinWorkspace } from '@/pages/workspace/WebhookBinWorkspace';
+import { SqlStudioWorkspace } from '@/pages/workspace/SqlStudioWorkspace';
 import { Login } from '@/pages/auth/Login';
 import { Register } from '@/pages/auth/Register';
 import { FormattersWorkspace } from '@/pages/formatters/FormattersWorkspace';
@@ -56,6 +57,10 @@ export const router = createBrowserRouter([
           {
             path: 'webhook-bin',
             element: <WebhookBinWorkspace />,
+          },
+          {
+            path: 'sql',
+            element: <SqlStudioWorkspace />,
           },
           {
             path: 'format',

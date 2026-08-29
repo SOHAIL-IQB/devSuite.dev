@@ -10,7 +10,7 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from '@/components/ui/command';
-import { Terminal, Code2, Radio, Layers, Webhook, Braces, BookText, Settings, Sun, Moon, Laptop, Clock, CalendarClock, Link2, Palette, FileCode2, FileText } from 'lucide-react';
+import { Terminal, Code2, Radio, Layers, Webhook, Database, Braces, BookText, Settings, Sun, Moon, Laptop, Clock, CalendarClock, Link2, Palette, FileCode2, FileText } from 'lucide-react';
 import { useThemeStore } from '@/store/themeStore';
 
 export function CommandPalette() {
@@ -60,6 +60,10 @@ export function CommandPalette() {
           <CommandItem onSelect={() => runCommand(() => navigate('/webhook-bin'))}>
             <Webhook className="mr-2 h-4 w-4" />
             <span>Webhook Bin & Request Catcher</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => navigate('/sql'))}>
+            <Database className="mr-2 h-4 w-4" />
+            <span>SQL Studio & ER Playground</span>
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => navigate('/format'))}>
             <Braces className="mr-2 h-4 w-4" />

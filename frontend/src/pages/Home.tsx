@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Code2, Braces, BookText, Activity, Lock, Hash, Regex, Server, Clock, CalendarClock, Link2, Palette, FileCode2, FileText, Radio, Layers, Webhook } from 'lucide-react';
+import { Code2, Braces, BookText, Activity, Lock, Hash, Regex, Server, Clock, CalendarClock, Link2, Palette, FileCode2, FileText, Radio, Layers, Webhook, Database } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { useNotesStore } from '@/store/notesStore';
@@ -30,6 +30,12 @@ const CARDS = [
     description: 'Capture, inspect, and mock real-time HTTP webhooks and payloads.',
     icon: <Webhook className="w-8 h-8 text-indigo-500" />,
     path: '/webhook-bin'
+  },
+  {
+    title: 'SQL Studio',
+    description: 'Design schemas, render visual ER diagrams, and generate types.',
+    icon: <Database className="w-8 h-8 text-cyan-500" />,
+    path: '/sql'
   },
   {
     title: 'Code Formatter',
