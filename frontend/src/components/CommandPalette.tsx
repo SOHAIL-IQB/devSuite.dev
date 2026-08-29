@@ -10,7 +10,7 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from '@/components/ui/command';
-import { Terminal, Code2, Radio, Layers, Webhook, Database, Braces, BookText, Settings, Sun, Moon, Laptop, Clock, CalendarClock, Link2, Palette, FileCode2, FileText } from 'lucide-react';
+import { Terminal, Code2, Radio, Layers, Webhook, Database, Server, Globe2, Braces, BookText, Settings, Sun, Moon, Laptop, Clock, CalendarClock, Link2, Palette, FileCode2, FileText } from 'lucide-react';
 import { useThemeStore } from '@/store/themeStore';
 
 export function CommandPalette() {
@@ -61,6 +61,10 @@ export function CommandPalette() {
             <Webhook className="mr-2 h-4 w-4" />
             <span>Webhook Bin & Request Catcher</span>
           </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => navigate('/mock-server'))}>
+            <Server className="mr-2 h-4 w-4" />
+            <span>Mock REST API Sandbox</span>
+          </CommandItem>
           <CommandItem onSelect={() => runCommand(() => navigate('/sql'))}>
             <Database className="mr-2 h-4 w-4" />
             <span>SQL Studio & ER Playground</span>
@@ -68,6 +72,10 @@ export function CommandPalette() {
           <CommandItem onSelect={() => runCommand(() => navigate('/curl'))}>
             <Terminal className="mr-2 h-4 w-4" />
             <span>cURL Converter & HTTP Reference</span>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => navigate('/network-tools'))}>
+            <Globe2 className="mr-2 h-4 w-4" />
+            <span>DNS & SSL Network Diagnostics</span>
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => navigate('/format'))}>
             <Braces className="mr-2 h-4 w-4" />

@@ -6,6 +6,8 @@ import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth.routes';
 import workspaceRoutes from './routes/workspace.routes';
 import webhookBinRoutes from './routes/webhookBin.routes';
+import mockServerRoutes from './routes/mockServer.routes';
+import networkDiagnosticsRoutes from './routes/networkDiagnostics.routes';
 
 const app: Express = express();
 const port = process.env.PORT || 3000;
@@ -26,6 +28,8 @@ app.use(cookieParser());
 app.use('/api/auth', authRoutes);
 app.use('/api/workspace', workspaceRoutes);
 app.use('/api/bin', webhookBinRoutes);
+app.use('/api/mock', mockServerRoutes);
+app.use('/api/diagnostics', networkDiagnosticsRoutes);
 
 // Health Check Route
 app.get('/api/health', (req: Request, res: Response) => {

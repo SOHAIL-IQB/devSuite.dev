@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Code2, Braces, BookText, Activity, Lock, Hash, Regex, Server, Clock, CalendarClock, Link2, Palette, FileCode2, FileText, Radio, Layers, Webhook, Database } from 'lucide-react';
+import { Code2, Braces, BookText, Activity, Lock, Hash, Regex, Server, Clock, CalendarClock, Link2, Palette, FileCode2, FileText, Radio, Layers, Webhook, Database, Globe2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { useNotesStore } from '@/store/notesStore';
@@ -32,6 +32,12 @@ const CARDS = [
     path: '/webhook-bin'
   },
   {
+    title: 'Mock Server',
+    description: 'Simulate dynamic REST APIs with latency and custom JSON schemas.',
+    icon: <Server className="w-8 h-8 text-teal-500" />,
+    path: '/mock-server'
+  },
+  {
     title: 'SQL Studio',
     description: 'Design schemas, render visual ER diagrams, and generate types.',
     icon: <Database className="w-8 h-8 text-cyan-500" />,
@@ -42,6 +48,12 @@ const CARDS = [
     description: 'Convert cURL commands to JavaScript, Python, Go, and Rust.',
     icon: <Code2 className="w-8 h-8 text-amber-500" />,
     path: '/curl'
+  },
+  {
+    title: 'Network Tools',
+    description: 'Authoritative DNS lookups and live SSL/TLS certificate inspector.',
+    icon: <Globe2 className="w-8 h-8 text-sky-500" />,
+    path: '/network-tools'
   },
   {
     title: 'Code Formatter',

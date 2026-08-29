@@ -24,7 +24,9 @@ import {
   Radio,
   Layers,
   Webhook,
-  Database
+  Database,
+  Server,
+  Globe2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -42,8 +44,10 @@ const NAV_ITEMS = [
   { name: 'WebSocket Client', path: '/websocket', icon: <Radio className="w-4 h-4" /> },
   { name: 'GraphQL Client', path: '/graphql', icon: <Layers className="w-4 h-4" /> },
   { name: 'Webhook Bin', path: '/webhook-bin', icon: <Webhook className="w-4 h-4" /> },
+  { name: 'Mock Server', path: '/mock-server', icon: <Server className="w-4 h-4" /> },
   { name: 'SQL Studio', path: '/sql', icon: <Database className="w-4 h-4" /> },
   { name: 'cURL Converter', path: '/curl', icon: <Terminal className="w-4 h-4" /> },
+  { name: 'Network Tools', path: '/network-tools', icon: <Globe2 className="w-4 h-4" /> },
   { name: 'Formatters', path: '/format', icon: <Braces className="w-4 h-4" /> },
   { name: 'Regex Tester', path: '/regex', icon: <Regex className="w-4 h-4" /> },
   { name: 'JWT Decoder', path: '/jwt', icon: <Lock className="w-4 h-4" /> },

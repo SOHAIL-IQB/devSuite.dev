@@ -16,6 +16,10 @@ import {
   type ParsedSchema
 } from '@/lib/sql_parser.utils';
 import {
+  convertSqlToPrisma,
+  convertSqlToDrizzle,
+} from '@/lib/schema_converter.utils';
+import {
   Database,
   Code2,
   FileCode,
@@ -23,7 +27,8 @@ import {
   Sparkles,
   Layers,
   Table,
-  Check
+  Check,
+  Boxes
 } from 'lucide-react';
 
 const SAMPLE_ECOMMERCE_DDL = `-- E-Commerce Database Schema
@@ -164,6 +169,8 @@ export function SqlStudioWorkspace() {
 
   const tsInterfaces = generateTypeScriptInterfaces(schema);
   const mockJson = generateMockJson(schema);
+  const prismaSchema = convertSqlToPrisma(sql);
+  const drizzleSchema = convertSqlToDrizzle(sql);
 
   const generateCrudQueries = (tableName: string) => {
     const table = schema.tables.find((t) => t.name === tableName);
@@ -303,22 +310,28 @@ WHERE ${pkCol} = $1;
 
           <ResizableHandle />
 
-          {/* RIGHT: TABS (ER DIAGRAM, TYPESCRIPT, MOCK JSON, CRUD SCAFFOLD) */}
+          {/* RIGHT: TABS (ER DIAGRAM, TYPESCRIPT, PRISMA, DRIZZLE, MOCK JSON, CRUD SCAFFOLD) */}
           <ResizablePanel defaultSize={55} minSize={35} className="flex flex-col bg-background min-h-0">
             <Tabs defaultValue="er" className="flex flex-col h-full min-h-0">
-              <div className="p-2 border-b bg-muted/10 flex items-center justify-between shrink-0 h-11">
+              <div className="p-2 border-b bg-muted/10 flex items-center justify-between shrink-0 h-11 overflow-x-auto mac-scrollbar">
                 <TabsList className="h-7 bg-muted/50 p-0.5">
-                  <TabsTrigger value="er" className="text-xs h-6 px-3">
-                    <Layers className="w-3.5 h-3.5 mr-1" /> Visual ER Diagram
+                  <TabsTrigger value="er" className="text-xs h-6 px-2.5">
+                    <Layers className="w-3.5 h-3.5 mr-1" /> ER Diagram
                   </TabsTrigger>
-                  <TabsTrigger value="ts" className="text-xs h-6 px-3">
-                    <FileCode className="w-3.5 h-3.5 mr-1" /> TypeScript Types
+                  <TabsTrigger value="ts" className="text-xs h-6 px-2.5">
+                    <FileCode className="w-3.5 h-3.5 mr-1" /> TypeScript
                   </TabsTrigger>
-                  <TabsTrigger value="json" className="text-xs h-6 px-3">
-                    <Database className="w-3.5 h-3.5 mr-1" /> Mock JSON
+                  <TabsTrigger value="prisma" className="text-xs h-6 px-2.5">
+                    <Boxes className="w-3.5 h-3.5 mr-1" /> Prisma
                   </TabsTrigger>
-                  <TabsTrigger value="crud" className="text-xs h-6 px-3">
-                    <Table className="w-3.5 h-3.5 mr-1" /> CRUD Queries
+                  <TabsTrigger value="drizzle" className="text-xs h-6 px-2.5">
+                    <Database className="w-3.5 h-3.5 mr-1" /> Drizzle
+                  </TabsTrigger>
+                  <TabsTrigger value="json" className="text-xs h-6 px-2.5">
+                    <Code2 className="w-3.5 h-3.5 mr-1" /> Mock JSON
+                  </TabsTrigger>
+                  <TabsTrigger value="crud" className="text-xs h-6 px-2.5">
+                    <Table className="w-3.5 h-3.5 mr-1" /> CRUD SQL
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -353,6 +366,62 @@ WHERE ${pkCol} = $1;
                   language="typescript"
                   theme={isDark ? 'vs-dark' : 'vs'}
                   value={tsInterfaces}
+                  options={{
+                    readOnly: true,
+                    minimap: { enabled: false },
+                    fontSize: 13,
+                    scrollBeyondLastLine: false,
+                    padding: { top: 12, bottom: 12 },
+                  }}
+                  className="absolute inset-0"
+                />
+              </TabsContent>
+
+              {/* PRISMA SCHEMA TAB */}
+              <TabsContent value="prisma" className="flex-1 p-0 m-0 min-h-0 relative">
+                <div className="absolute top-3 right-3 z-10">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs shadow-xs"
+                    onClick={() => handleCopy(prismaSchema, 'Prisma Schema')}
+                  >
+                    <Copy className="w-3.5 h-3.5 mr-1" /> Copy Prisma
+                  </Button>
+                </div>
+                <Editor
+                  height="100%"
+                  language="graphql"
+                  theme={isDark ? 'vs-dark' : 'vs'}
+                  value={prismaSchema}
+                  options={{
+                    readOnly: true,
+                    minimap: { enabled: false },
+                    fontSize: 13,
+                    scrollBeyondLastLine: false,
+                    padding: { top: 12, bottom: 12 },
+                  }}
+                  className="absolute inset-0"
+                />
+              </TabsContent>
+
+              {/* DRIZZLE ORM TAB */}
+              <TabsContent value="drizzle" className="flex-1 p-0 m-0 min-h-0 relative">
+                <div className="absolute top-3 right-3 z-10">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs shadow-xs"
+                    onClick={() => handleCopy(drizzleSchema, 'Drizzle ORM')}
+                  >
+                    <Copy className="w-3.5 h-3.5 mr-1" /> Copy Drizzle
+                  </Button>
+                </div>
+                <Editor
+                  height="100%"
+                  language="typescript"
+                  theme={isDark ? 'vs-dark' : 'vs'}
+                  value={drizzleSchema}
                   options={{
                     readOnly: true,
                     minimap: { enabled: false },

@@ -9,6 +9,8 @@ import { GraphQLWorkspace } from '@/pages/workspace/GraphQLWorkspace';
 import { WebhookBinWorkspace } from '@/pages/workspace/WebhookBinWorkspace';
 import { SqlStudioWorkspace } from '@/pages/workspace/SqlStudioWorkspace';
 import { CurlConverterWorkspace } from '@/pages/workspace/CurlConverterWorkspace';
+import { MockServerWorkspace } from '@/pages/workspace/MockServerWorkspace';
+import { NetworkDiagnosticsWorkspace } from '@/pages/workspace/NetworkDiagnosticsWorkspace';
 import { Login } from '@/pages/auth/Login';
 import { Register } from '@/pages/auth/Register';
 import { FormattersWorkspace } from '@/pages/formatters/FormattersWorkspace';
@@ -66,6 +68,14 @@ export const router = createBrowserRouter([
           {
             path: 'curl',
             element: <CurlConverterWorkspace />,
+          },
+          {
+            path: 'mock-server',
+            element: <MockServerWorkspace />,
+          },
+          {
+            path: 'network-tools',
+            element: <NetworkDiagnosticsWorkspace />,
           },
           {
             path: 'format',
