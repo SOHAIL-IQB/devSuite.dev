@@ -26,13 +26,15 @@ import {
   Folder, 
   FileCode, 
   Copy, 
-  Terminal, 
   Lock, 
   Key, 
   User, 
-  SlidersHorizontal
+  SlidersHorizontal,
+  Upload,
+  Download
 } from 'lucide-react';
 import { generateCurl, parseCurl } from '@/lib/curl.utils';
+import { parseOpenApi, parsePostmanCollection, exportToOpenApi } from '@/lib/openapi.utils';
 
 export function ApiWorkspace() {
   const { theme } = useThemeStore();
@@ -63,8 +65,9 @@ export function ApiWorkspace() {
   // Dialogs
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [saveName, setSaveName] = useState(activeRequest.name || 'My Request');
-  const [curlImportOpen, setCurlImportOpen] = useState(false);
-  const [curlInput, setCurlInput] = useState('');
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [importTab, setImportTab] = useState<'curl' | 'openapi' | 'postman'>('curl');
+  const [importInput, setImportInput] = useState('');
 
   const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
@@ -138,15 +141,23 @@ export function ApiWorkspace() {
       });
 
       setResponse(res.data);
-      if (res.data.status >= 200 && res.data.status < 300) {
-        toast.success(`Request completed (${res.data.status} ${res.data.statusText || 'OK'})`);
-      } else {
-        toast.info(`Request returned HTTP ${res.data.status}`);
+      toast.success(`Request completed (${res.data.status} ${res.data.statusText || 'OK'})`);
+    } catch (err: unknown) {
+      let errorMsg = 'Proxy request failed';
+      if (err && typeof err === 'object' && 'response' in err) {
+        const responseData = (err as { response?: { data?: { error?: string } } }).response?.data;
+        if (responseData?.error) {
+          errorMsg = responseData.error;
+        }
       }
-    } catch (err: any) {
-      const errMsg = err.response?.data?.error || err.message || 'Failed to execute request';
-      setResponse(err.response?.data || { error: errMsg });
-      toast.error(errMsg);
+      toast.error(errorMsg);
+      setResponse({
+        status: 500,
+        statusText: 'Error',
+        data: { error: errorMsg },
+        headers: {},
+        timeMs: 0,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -184,16 +195,82 @@ export function ApiWorkspace() {
     toast.success('cURL command copied to clipboard');
   };
 
-  const handleImportCurl = () => {
-    const parsed = parseCurl(curlInput);
-    if (!parsed) {
-      toast.error('Invalid cURL command format');
+  const handleExecuteImport = async () => {
+    if (!importInput.trim()) {
+      toast.error('Please enter specification or snippet to import');
       return;
     }
-    setActiveRequest(parsed);
-    toast.success('cURL command imported');
-    setCurlImportOpen(false);
-    setCurlInput('');
+
+    try {
+      if (importTab === 'curl') {
+        const parsed = parseCurl(importInput);
+        if (!parsed) {
+          toast.error('Invalid cURL command format');
+          return;
+        }
+        setActiveRequest(parsed);
+        toast.success('cURL command imported');
+      } else if (importTab === 'openapi') {
+        const endpoints = parseOpenApi(importInput);
+        if (endpoints.length === 0) {
+          toast.error('No endpoints found in OpenAPI specification');
+          return;
+        }
+        // Load the first endpoint into active request
+        setActiveRequest(endpoints[0]);
+        // Save all endpoints to collection
+        for (const ep of endpoints) {
+          await api.post('/workspace/request', {
+            name: ep.name,
+            method: ep.method,
+            url: ep.url,
+            headers: ep.headers,
+            queryParams: ep.queryParams,
+            body: ep.body,
+          });
+        }
+        await fetchWorkspaces();
+        toast.success(`Imported ${endpoints.length} endpoints from OpenAPI specification`);
+      } else if (importTab === 'postman') {
+        const endpoints = parsePostmanCollection(importInput);
+        if (endpoints.length === 0) {
+          toast.error('No requests found in Postman Collection');
+          return;
+        }
+        setActiveRequest(endpoints[0]);
+        for (const ep of endpoints) {
+          await api.post('/workspace/request', {
+            name: ep.name,
+            method: ep.method,
+            url: ep.url,
+            headers: ep.headers,
+            queryParams: ep.queryParams,
+            body: ep.body,
+          });
+        }
+        await fetchWorkspaces();
+        toast.success(`Imported ${endpoints.length} requests from Postman Collection`);
+      }
+
+      setImportModalOpen(false);
+      setImportInput('');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Import failed';
+      toast.error(msg);
+    }
+  };
+
+  const handleExportOpenApi = () => {
+    const listToExport = savedRequests.length > 0 ? savedRequests : [activeRequest];
+    const openApiJson = exportToOpenApi(listToExport);
+    const blob = new Blob([openApiJson], { type: 'application/json' });
+    const href = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = href;
+    a.download = `openapi-collection-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(href);
+    toast.success('OpenAPI specification exported');
   };
 
   const getStatusColor = (status?: number) => {
@@ -342,7 +419,7 @@ export function ApiWorkspace() {
             <Button
               variant="outline"
               size="sm"
-              className="h-11 px-3 rounded-lg shrink-0 text-xs font-mono hidden sm:flex items-center gap-1.5"
+              className="h-11 px-3 rounded-lg shrink-0 text-xs font-mono hidden sm:flex items-center gap-1.5 shadow-sm"
               onClick={handleCopyCurl}
               title="Copy as cURL command"
             >
@@ -350,13 +427,23 @@ export function ApiWorkspace() {
             </Button>
 
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
-              className="h-11 px-2.5 rounded-lg shrink-0 text-xs text-muted-foreground hover:text-foreground hidden sm:flex"
-              onClick={() => setCurlImportOpen(true)}
-              title="Import cURL command"
+              className="h-11 px-3 rounded-lg shrink-0 text-xs font-medium hidden sm:flex items-center gap-1.5 shadow-sm"
+              onClick={() => setImportModalOpen(true)}
+              title="Import cURL, OpenAPI, or Postman"
             >
-              <Terminal className="w-3.5 h-3.5 mr-1" /> Import
+              <Upload className="w-3.5 h-3.5" /> Import
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-11 px-3 rounded-lg shrink-0 text-xs font-medium hidden sm:flex items-center gap-1.5 shadow-sm"
+              onClick={handleExportOpenApi}
+              title="Export Collection as OpenAPI 3.0"
+            >
+              <Download className="w-3.5 h-3.5" /> Export OpenAPI
             </Button>
           </div>
 
@@ -720,24 +807,47 @@ export function ApiWorkspace() {
         </DialogContent>
       </Dialog>
 
-      {/* IMPORT CURL MODAL */}
-      <Dialog open={curlImportOpen} onOpenChange={setCurlImportOpen}>
-        <DialogContent className="sm:max-w-lg">
+      {/* UNIFIED MULTI-FORMAT IMPORT MODAL */}
+      <Dialog open={importModalOpen} onOpenChange={setImportModalOpen}>
+        <DialogContent className="sm:max-w-xl">
           <DialogHeader>
-            <DialogTitle>Import cURL Command</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="w-4 h-4 text-primary" /> Import API Request / Collection
+            </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <p className="text-xs text-muted-foreground">Paste a raw cURL command to populate URL, headers, method, and request body.</p>
+          <div className="space-y-4 py-3">
+            <Tabs value={importTab} onValueChange={(val: any) => setImportTab(val)}>
+              <TabsList className="grid grid-cols-3 w-full">
+                <TabsTrigger value="curl">cURL Command</TabsTrigger>
+                <TabsTrigger value="openapi">OpenAPI 3.0 / Swagger</TabsTrigger>
+                <TabsTrigger value="postman">Postman Collection</TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            <p className="text-xs text-muted-foreground">
+              {importTab === 'curl' && 'Paste a raw cURL command to populate method, URL, headers, and request body.'}
+              {importTab === 'openapi' && 'Paste an OpenAPI 3.0 or Swagger 2.0 JSON / YAML specification to import all endpoints into your collection.'}
+              {importTab === 'postman' && 'Paste a Postman Collection v2.1 JSON to import all collection requests.'}
+            </p>
+
             <Textarea 
-              value={curlInput}
-              onChange={(e) => setCurlInput(e.target.value)}
-              placeholder="curl -X POST https://api.example.com/v1 -H 'Authorization: Bearer 123' -d '{...}'"
-              className="font-mono text-xs h-36 resize-none"
+              value={importInput}
+              onChange={(e) => setImportInput(e.target.value)}
+              placeholder={
+                importTab === 'curl'
+                  ? "curl -X POST https://api.example.com/v1 -H 'Authorization: Bearer 123' -d '{...}'"
+                  : importTab === 'openapi'
+                  ? '{\n  "openapi": "3.0.0",\n  "info": { "title": "API", "version": "1.0.0" },\n  "paths": { ... }\n}'
+                  : '{\n  "info": { "name": "Collection" },\n  "item": [ ... ]\n}'
+              }
+              className="font-mono text-xs h-44 resize-none mac-scrollbar"
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCurlImportOpen(false)}>Cancel</Button>
-            <Button onClick={handleImportCurl} disabled={!curlInput.trim()}>Import cURL</Button>
+            <Button variant="outline" onClick={() => setImportModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleExecuteImport} disabled={!importInput.trim()}>
+              Import {importTab === 'curl' ? 'cURL' : importTab === 'openapi' ? 'OpenAPI' : 'Postman'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

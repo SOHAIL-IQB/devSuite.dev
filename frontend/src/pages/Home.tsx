@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Code2, Braces, BookText, Activity, Lock, Hash, Regex, Server, Clock, CalendarClock, Link2, Palette, FileCode2, FileText } from 'lucide-react';
+import { Code2, Braces, BookText, Activity, Lock, Hash, Regex, Server, Clock, CalendarClock, Link2, Palette, FileCode2, FileText, Radio } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { useNotesStore } from '@/store/notesStore';
@@ -12,6 +12,12 @@ const CARDS = [
     description: 'Test, manage, and save your API requests like Postman.',
     icon: <Code2 className="w-8 h-8 text-blue-500" />,
     path: '/api'
+  },
+  {
+    title: 'WebSocket Client',
+    description: 'Test full-duplex WebSocket connections and live event streams.',
+    icon: <Radio className="w-8 h-8 text-emerald-500" />,
+    path: '/websocket'
   },
   {
     title: 'Code Formatter',

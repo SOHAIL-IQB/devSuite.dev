@@ -20,7 +20,8 @@ import {
   Link2,
   Palette,
   FileCode2,
-  FileText
+  FileText,
+  Radio
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -35,6 +36,7 @@ import {
 const NAV_ITEMS = [
   { name: 'Dashboard', path: '/', icon: <Terminal className="w-4 h-4" /> },
   { name: 'API Workspace', path: '/api', icon: <Code2 className="w-4 h-4" /> },
+  { name: 'WebSocket Client', path: '/websocket', icon: <Radio className="w-4 h-4" /> },
   { name: 'Formatters', path: '/format', icon: <Braces className="w-4 h-4" /> },
   { name: 'Regex Tester', path: '/regex', icon: <Regex className="w-4 h-4" /> },
   { name: 'JWT Decoder', path: '/jwt', icon: <Lock className="w-4 h-4" /> },

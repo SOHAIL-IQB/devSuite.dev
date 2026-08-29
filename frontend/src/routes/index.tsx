@@ -4,6 +4,7 @@ import { AuthLayout } from '@/layouts/AuthLayout';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { Home } from '@/pages/Home';
 import { ApiWorkspace } from '@/pages/workspace/ApiWorkspace';
+import { WebSocketWorkspace } from '@/pages/workspace/WebSocketWorkspace';
 import { Login } from '@/pages/auth/Login';
 import { Register } from '@/pages/auth/Register';
 import { FormattersWorkspace } from '@/pages/formatters/FormattersWorkspace';
@@ -41,6 +42,10 @@ export const router = createBrowserRouter([
           {
             path: 'api',
             element: <ApiWorkspace />,
+          },
+          {
+            path: 'websocket',
+            element: <WebSocketWorkspace />,
           },
           {
             path: 'format',
