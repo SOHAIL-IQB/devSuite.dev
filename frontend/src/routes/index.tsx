@@ -14,6 +14,9 @@ import { NetworkDiagnosticsWorkspace } from '@/pages/workspace/NetworkDiagnostic
 import { DockerStudioWorkspace } from '@/pages/workspace/DockerStudioWorkspace';
 import { CicdStudioWorkspace } from '@/pages/workspace/CicdStudioWorkspace';
 import { GitStudioWorkspace } from '@/pages/workspace/GitStudioWorkspace';
+import { RegexStudioWorkspace } from '@/pages/workspace/RegexStudioWorkspace';
+import { CryptoStudioWorkspace } from '@/pages/workspace/CryptoStudioWorkspace';
+import { BenchmarkWorkspace } from '@/pages/workspace/BenchmarkWorkspace';
 import { Login } from '@/pages/auth/Login';
 import { Register } from '@/pages/auth/Register';
 import { FormattersWorkspace } from '@/pages/formatters/FormattersWorkspace';
@@ -91,6 +94,18 @@ export const router = createBrowserRouter([
           {
             path: 'git-tools',
             element: <GitStudioWorkspace />,
+          },
+          {
+            path: 'regex-studio',
+            element: <RegexStudioWorkspace />,
+          },
+          {
+            path: 'crypto-studio',
+            element: <CryptoStudioWorkspace />,
+          },
+          {
+            path: 'benchmark',
+            element: <BenchmarkWorkspace />,
           },
           {
             path: 'format',

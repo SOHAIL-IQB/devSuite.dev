@@ -5,13 +5,14 @@ import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { User, Monitor, Trash2, ShieldAlert } from 'lucide-react';
+import { User, Monitor, Trash2, ShieldAlert, DownloadCloud, UploadCloud, Database } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
+import { exportWorkspaceData, validateAndParseBackup } from '@/lib/workspace_sync.utils';
 
 export function SettingsWorkspace() {
   const { user, setUser, logout } = useAuthStore();
   const { theme, setTheme } = useThemeStore();
-  const [activeTab, setActiveTab] = useState<'profile' | 'appearance' | 'account'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'appearance' | 'account' | 'backup'>('profile');
 
   // Forms State
   const [name, setName] = useState(user?.name || '');
@@ -22,6 +23,59 @@ export function SettingsWorkspace() {
   const [isSaving, setIsSaving] = useState(false);
 
   if (!user) return <Navigate to="/login" />;
+
+  const handleExportBackup = () => {
+    try {
+      const backupJson = exportWorkspaceData({
+        collections: JSON.parse(localStorage.getItem('api_collections') || '[]'),
+        environments: JSON.parse(localStorage.getItem('environments') || '[]'),
+        notes: JSON.parse(localStorage.getItem('dev_notes') || '[]'),
+      });
+
+      const blob = new Blob([backupJson], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `devsuite-backup-${new Date().toISOString().split('T')[0]}.devsuite.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast.success('Workspace backup exported successfully');
+    } catch {
+      toast.error('Failed to export workspace backup');
+    }
+  };
+
+  const handleImportBackup = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      const result = validateAndParseBackup(content);
+
+      if (!result.valid || !result.backup) {
+        toast.error(result.error || 'Invalid backup file');
+        return;
+      }
+
+      if (result.backup.data.collections) {
+        localStorage.setItem('api_collections', JSON.stringify(result.backup.data.collections));
+      }
+      if (result.backup.data.environments) {
+        localStorage.setItem('environments', JSON.stringify(result.backup.data.environments));
+      }
+      if (result.backup.data.notes) {
+        localStorage.setItem('dev_notes', JSON.stringify(result.backup.data.notes));
+      }
+
+      toast.success('Workspace restored successfully from backup!');
+    };
+    reader.readAsText(file);
+  };
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,12 +145,13 @@ export function SettingsWorkspace() {
     }
   };
 
-  type TabId = 'profile' | 'appearance' | 'account';
+  type TabId = 'profile' | 'appearance' | 'account' | 'backup';
 
   const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
     { id: 'profile', label: 'Profile Settings', icon: <User className="w-4 h-4 mr-2" /> },
     { id: 'appearance', label: 'Appearance', icon: <Monitor className="w-4 h-4 mr-2" /> },
     { id: 'account', label: 'Account Security', icon: <ShieldAlert className="w-4 h-4 mr-2" /> },
+    { id: 'backup', label: 'Backup & Cloud Sync', icon: <Database className="w-4 h-4 mr-2" /> },
   ];
 
   return (
@@ -171,6 +226,49 @@ export function SettingsWorkspace() {
                     <div className="h-16 bg-gradient-to-r from-white to-[#09090b] border rounded shadow-sm mb-2" />
                     <div className="text-sm font-medium text-center">System</div>
                   </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'backup' && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2">
+              <div>
+                <h3 className="text-lg font-medium">Workspace Backup & Cloud Sync</h3>
+                <p className="text-sm text-muted-foreground">
+                  Export complete workspace snapshots (APIs, Environments, Notes, Mocks) and restore anytime.
+                </p>
+              </div>
+              <div className="h-px bg-border" />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 border rounded-lg bg-muted/10 flex flex-col justify-between gap-4">
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-semibold flex items-center gap-1.5">
+                      <DownloadCloud className="w-4 h-4 text-primary" /> Export Workspace Snapshot
+                    </h4>
+                    <p className="text-xs text-muted-foreground">
+                      Downloads an encrypted <code className="font-mono text-[11px] bg-background px-1 py-0.5 rounded">.devsuite.json</code> file containing all your collections and local workspace data.
+                    </p>
+                  </div>
+                  <Button onClick={handleExportBackup} className="h-8 text-xs">
+                    <DownloadCloud className="w-3.5 h-3.5 mr-1" /> Export .devsuite.json
+                  </Button>
+                </div>
+
+                <div className="p-4 border rounded-lg bg-muted/10 flex flex-col justify-between gap-4">
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-semibold flex items-center gap-1.5">
+                      <UploadCloud className="w-4 h-4 text-emerald-500" /> Restore from Snapshot
+                    </h4>
+                    <p className="text-xs text-muted-foreground">
+                      Restore your workspace state from an existing <code className="font-mono text-[11px] bg-background px-1 py-0.5 rounded">.devsuite.json</code> backup file.
+                    </p>
+                  </div>
+                  <label className="flex items-center justify-center h-8 text-xs border rounded bg-background hover:bg-muted/50 cursor-pointer font-medium transition-colors">
+                    <UploadCloud className="w-3.5 h-3.5 mr-1" /> Select Backup File
+                    <input type="file" accept=".json,.devsuite.json" onChange={handleImportBackup} className="sr-only" />
+                  </label>
                 </div>
               </div>
             </div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Code2, Braces, BookText, Activity, Lock, Hash, Regex, Server, Clock, CalendarClock, Link2, Palette, FileCode2, FileText, Radio, Layers, Webhook, Database, Globe2, Container, GitPullRequest, GitBranch } from 'lucide-react';
+import { Code2, Braces, BookText, Activity, Lock, Hash, Regex, Server, Clock, CalendarClock, Link2, Palette, FileCode2, FileText, Radio, Layers, Webhook, Database, Globe2, Container, GitPullRequest, GitBranch, ShieldAlert } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { useNotesStore } from '@/store/notesStore';
@@ -72,6 +72,24 @@ const CARDS = [
     description: 'Build Conventional Commits, resolve tricky Git undo scenarios, and parse logs.',
     icon: <GitBranch className="w-8 h-8 text-red-500" />,
     path: '/git-tools'
+  },
+  {
+    title: 'RegEx Studio',
+    description: 'Deep regex AST breakdown, capture group inspector, and substitution engine.',
+    icon: <Regex className="w-8 h-8 text-pink-500" />,
+    path: '/regex-studio'
+  },
+  {
+    title: 'Crypto Studio',
+    description: 'Client-side AES-256-GCM encryption, HMAC signatures, and token entropy generator.',
+    icon: <ShieldAlert className="w-8 h-8 text-indigo-500" />,
+    path: '/crypto-studio'
+  },
+  {
+    title: 'API Benchmark',
+    description: 'Concurrency stress testing, p50/p90/p99 latency analysis, and compression profiler.',
+    icon: <Activity className="w-8 h-8 text-amber-500" />,
+    path: '/benchmark'
   },
   {
     title: 'Code Formatter',
